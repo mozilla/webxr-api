@@ -15,7 +15,7 @@ Education: High School Diploma
 
 Division: Sales
 
-Experience: Full time mother of three kids. Then, eleven years as the assistant to the woman who is now an SVP.
+Experience: Full time mother of three kids. Then, eleven years as the assistant to the woman who is now a SVP.
 
 Responsibilities: Books travel arrangements, manages her boss's schedule, cheerfully fends off time wasters, oversees the younger assistants.
 
