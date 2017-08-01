@@ -11,11 +11,11 @@ Quote: "I sent that four days ago because I knew that you'd want it sent."
 
 Age: 48
 
-Education: BA from Ohio State
+Education: High School Diploma
 
 Division: Sales
 
-Experience: High School Diploma. Full time mother of three kids. Then, eleven years as the assistant to the woman who is now an SVP.
+Experience: Full time mother of three kids. Then, eleven years as the assistant to the woman who is now an SVP.
 
 Responsibilities: Books travel arrangements, manages her boss's schedule, cheerfully fends off time wasters, oversees the younger assistants.
 
