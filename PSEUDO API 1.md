@@ -20,6 +20,7 @@
 
 ### Todo
 
+- indicate that the display is opaque or clear
 - calibration
 
 ## Reality
@@ -41,8 +42,10 @@
 
 ### Todo
 
+- requesting reality data (e.g. camera image)
 - configuration
 - anchors
+- picking
 - manifold instead of point cloud
 
 ## XRPointCloud
@@ -68,6 +71,7 @@
 		attribute double depthFar;
 
 		attribute XRLayer layer;
+		attribute Reality reality;
 
 		Promise<sequence <Reality>> getRealities();
 
