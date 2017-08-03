@@ -43,9 +43,6 @@
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
-		long addAnchor(XRAnchor anchor);
-		void removeAnchor(long id);
-
 		Promise<void> endSession();
 
 		attribute EventHandler onblur;
@@ -62,15 +59,8 @@
 		readonly attribute XRCoordinates stageLocation;
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
 
-		readonly attribute boolean hasPointCloud;
-		readonly attribute boolean hasLightEstimate;
-
 		Promise<boolean> requestStageLocation(float x, float y float z, XRCoordinates)
 		Promise<boolean> requestResetStageLocation()
-
-		Promise<XRPointCloud> getPointCloud()
-
-		Promise<XRLightEstimate> getLightEstimate()
 
 		attribute EventHandler onchange;
 	};
@@ -112,6 +102,17 @@
 
 	interface XRPresentationFrame {
 		readonly attribute FrozenArray<XRView> views;
+
+		readonly attribute boolean hasPointCloud;
+		readonly attribute boolean hasLightEstimate;
+
+		Promise<XRPointCloud> getPointCloud()
+		Promise<XRLightEstimate> getLightEstimate()
+
+		long addAnchor(XRAnchor anchor);
+		void removeAnchor(long id);
+		XRAnchor? getAnchor(long id);
+		<sequence <XRAnchor>> getAnchors();
 
 		XRDisplayPose? getDisplayPose(XRCoordinateSystem coordinateSystem);
 	};
