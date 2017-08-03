@@ -20,7 +20,40 @@
 
 ### Todo
 
-- calibration and orientation reset
+- calibration
+- orientation reset
+
+## XRSession
+
+	interface XRSession : EventTarget {
+		readonly attribute XRDisplay display;
+		readonly attribute XRSessionCreateParameters createParameters;
+
+		attribute double depthNear;
+		attribute double depthFar;
+
+		attribute XRLayer layer;
+		attribute Reality reality; // Defaults to an empty (VR) reality
+
+		Promise<sequence <Reality>> getRealities(); // Always returns at least the default empty reality
+		Promise<boolean> requestRealityChange(Reality reality); // resolves true if the request is accepted
+
+		Promise<XRFrameOfReference> requestFrameOfReference(XRFrameOfReferenceType type);
+
+		long requestFrame(XRFrameRequestCallback callback);
+		void cancelFrame(long handle);
+
+		long addAnchor(XRAnchor anchor);
+		void removeAnchor(long id);
+
+		Promise<void> endSession();
+
+		attribute EventHandler onblur;
+		attribute EventHandler onfocus;
+		attribute EventHandler onresetpose;
+		attribute EventHandler onended;
+		attribute EventHandler onrealitychanged;
+	};
 
 ## Reality
 
@@ -44,10 +77,8 @@
 
 ### Todo
 
-- requesting a different reality data (e.g. camera image, VR "empty" reality, or a map "street view")
-- configuration
+- configuration (e.g. change white balance on camera input, change options on map view)
 - offer a manifold aor a point cloud?
-- picking
 
 
 ## XRPointCloud
@@ -76,36 +107,6 @@
 		readonly attribute Float32Array orientation; // quaternion?
 		readonly attribute Float32Array extent; // width, length
 	}
-
-## XRSession
-
-	interface XRSession : EventTarget {
-		readonly attribute XRDisplay display;
-		readonly attribute XRSessionCreateParameters createParameters;
-
-		attribute double depthNear;
-		attribute double depthFar;
-
-		attribute XRLayer layer;
-		attribute Reality reality;
-
-		Promise<sequence <Reality>> getRealities();
-
-		Promise<XRFrameOfReference> requestFrameOfReference(XRFrameOfReferenceType type);
-
-		long requestFrame(XRFrameRequestCallback callback);
-		void cancelFrame(long handle);
-
-		long addAnchor(XRAnchor anchor);
-		void removeAnchor(long id);
-
-		Promise<void> endSession();
-
-		attribute EventHandler onblur;
-		attribute EventHandler onfocus;
-		attribute EventHandler onresetpose;
-		attribute EventHandler onended;
-	};
 
 ## XRPresentationFrame
 
@@ -160,7 +161,18 @@
 
 ## XRLayer
 
-	interface XRLayer {};
+	interface XRLayer : EventTarget {
+		readonly attribute boolean hasFocus;
+
+		attribute EventHandler onfocus;
+		attribute EventHandler onblur;
+	};
+
+### Todo
+
+- misbehavior: visual, CPU, GPU, network
+
+## XRWebGLLayer
 
 	typedef (WebGLRenderingContext or WebGL2RenderingContext) XRWebGLRenderingContext;
 
@@ -182,8 +194,4 @@
 		void requestViewportScaling(double viewportScaleFactor);
 	};
 
-### Todo
-
-- focus / blur
-- misbehavior
 
