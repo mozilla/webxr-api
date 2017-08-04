@@ -8,7 +8,6 @@
 		attribute EventHandler ondisplaydisconnect;
 	};
 
-
 ## XRDisplay
 
 	interface XRDisplay : EventTarget {
@@ -20,6 +19,14 @@
 
 		attribute EventHandler ondeactivate;
 	};
+
+Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
+
+A Pixel XL could expose several displays: a flat display, a magic window display, a Cardboard display, and a Daydream display.
+
+A PC with an attached HMD could expose a flat display and the HMD.
+
+A PC with no attached HMD could expose single a flat display.
 
 ### Todo
 
@@ -43,7 +50,7 @@
 		Promise<sequence <Reality>> getRealities();
 		Promise<boolean> requestRealityChange(Reality reality); // resolves true if the request is accepted
 
-		Promise<XRFrameOfReference> requestFrameOfReference(XRFrameOfReferenceType type);
+		Promise<XRFrameOfReference?> requestFrameOfReference(XRFrameOfReferenceType type);
 
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
@@ -57,6 +64,8 @@
 		attribute EventHandler onrealitychanged;
 	};
 
+A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as access to the frame of reference,  and sampling frames.
+
 ## Reality
 
 	interface Reality : EventTarget {
@@ -64,17 +73,21 @@
 		readonly attribute XRCoordinates stageLocation;
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
 
-		Promise<boolean> requestStageLocation(XRCoordinates coordinates);
-		Promise<boolean> requestResetStageLocation();
+		Promise<boolean> changeStageLocation(XRCoordinates coordinates);
+		Promise<boolean> resetStageLocation();
 
 		attribute EventHandler onchange;
 	};
 
+A Reality represents a view of the world, be it the real world via sensors or a virtual world that is rendered with WebGL or WebGPU.
+
+Realities can be shared among XRSessions, with multiple scripts rendering into their separate XRLayer.context that are then composited by the UA with the Reality being the rearmost layer.
+
+A script can request an empty Reality from the session in order to create a fully virtual environment.
+
 ### Todo
-
+- Need to expose the stage origin and bounds
 - configuration (e.g. change white balance on camera input, change options on map view)
-- offer a manifold aor a point cloud?
-
 
 ## XRPointCloud
 
@@ -85,23 +98,37 @@
 ## XRLightEstimate
 
 	interface XRLightEstimate {
-		readonly attribute float ambientIntensity;
-		readonly attribute float ambientColorTemperature;
+		readonly attribute double ambientIntensity;
+		readonly attribute double ambientColorTemperature;
 	}
 
 ## XRAnchor
 
 	interface XRAnchor {
-		readonly attribute long id;
-		readonly attribute Float32Array center; // x, y, z
+		readonly attribute DOMString uid;
+		readonly attribute XRCoordinateSystem coordinateSystem;
+		readonly attribute double x;
+		readonly attribute double y;
+		readonly attribute double z;
 	}
 
 ## XRPlaneAnchor
 
 	interface XRPlaneAnchor : XRAnchor {
 		readonly attribute Float32Array orientation; // quaternion?
-		readonly attribute Float32Array extent; // width, length
+		readonly attribute double width;
+		readonly attribute double length;
 	}
+
+## XRManifold
+
+	interface XRManifold {
+		TBD
+	}
+
+### Todo
+
+- expose the manifold vertices and edges as well as its extent (FOV only, full sphere, etc)
 
 ## XRPresentationFrame
 
@@ -118,13 +145,14 @@
 		readonly attribute XRLightEstimate lightEstimate;
 		
 		long addAnchor(XRAnchor anchor);
-		void removeAnchor(long id);
-		XRAnchor? getAnchor(long id);
+		void removeAnchor(DOMString uid);
+		XRAnchor? getAnchor(DOMString uid);
 		<sequence <XRAnchor>> getAnchors();
 
 		XRDisplayPose? getDisplayPose(XRCoordinateSystem coordinateSystem);
 	};
 
+### Todo
 
 - access camera image buffer aor texture
 
@@ -146,12 +174,16 @@
 		readonly attribute long height;
 	};
 
+
 ## XRCartographicCoordinates
 
 	interface XRCartographicCoordinates {
-		attribute float latitude;
-		attribute float longitude;
-		attribute float altitude;
+		attribute double latitude;
+		attribute double longitude;
+		attribute double positionAccuracy;
+		attribute double altitude;
+		attribute double altitudeAccuracy;
+		attribute Float32Array orientation; // quaternion from 0,0,0,1 EUS?
 	}
 
 ## XRCoordinateSystem
@@ -162,13 +194,23 @@
 		Float32Array? getTransformTo(XRCoordinateSystem other);
 	};
 
+## XRFrameOfReference
+
+	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage", "spatial" };
+
+	interface XRFrameOfReference : XRCoordinateSystem {
+		readonly attribute XRStageBounds? bounds;
+		attribute EventHandler onboundschange;
+	};
+
+
 ## XRCoordinates
 
 	interface XRCoordinates {
 		attribute XRCoordinateSystem;
-		attribute float x;
-		attribute float y;
-		attribute float z;
+		attribute double x;
+		attribute double y;
+		attribute double z;
 	};
 
 ## XRDisplayPose
@@ -187,6 +229,8 @@
 		attribute EventHandler onfocus;
 		attribute EventHandler onblur;
 	};
+
+The focus and blur events are separate from the session events with the same names. The UA selects a single layer at a time to receive focus for input events, usually based on actions taken by the user.
 
 ### Todo
 
