@@ -20,8 +20,13 @@ class VRSetupExample {
 
 	handleNewSession(session){
 		this.session = session
-		// Session defaults to an empty Reality so just start rendering
-		this.session.requestFrame(frame => { this.handleFrame(frame) })
+		this.session.requestRealityChange(this.session.createEmptyReality()).then(changed => {
+			if(changed === false){
+				console.error('Could not change realities')
+				return
+			}
+			this.session.requestFrame(frame => { this.handleFrame(frame) })
+		})
 	}
 
 	handleFrame(frame){

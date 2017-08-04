@@ -3,6 +3,9 @@
 
 	interface XR {
 		Promise<sequence<XRDisplay>> getDisplays();
+
+		attribute EventHandler ondisplayconnect;
+		attribute EventHandler ondisplaydisconnect;
 	};
 
 
@@ -33,9 +36,11 @@
 		attribute double depthFar;
 
 		attribute XRLayer layer;
-		attribute Reality reality; // Defaults to an empty (VR) reality
+		attribute Reality reality; // Defaults to most recently used Reality
 
-		Promise<sequence <Reality>> getRealities(); // Always returns at least the default empty reality
+
+		Reality createEmptyReality();
+		Promise<sequence <Reality>> getRealities();
 		Promise<boolean> requestRealityChange(Reality reality); // resolves true if the request is accepted
 
 		Promise<XRFrameOfReference> requestFrameOfReference(XRFrameOfReferenceType type);
@@ -59,8 +64,8 @@
 		readonly attribute XRCoordinates stageLocation;
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
 
-		Promise<boolean> requestStageLocation(float x, float y float z, XRCoordinates)
-		Promise<boolean> requestResetStageLocation()
+		Promise<boolean> requestStageLocation(XRCoordinates coordinates);
+		Promise<boolean> requestResetStageLocation();
 
 		attribute EventHandler onchange;
 	};
@@ -104,11 +109,14 @@
 		readonly attribute FrozenArray<XRView> views;
 
 		readonly attribute boolean hasPointCloud;
+		readonly attribute XRPointCloud pointCloud;
+
+		readonly attribute boolean hasManifold;
+		readonly attribute XRManifold manifold;
+
 		readonly attribute boolean hasLightEstimate;
-
-		Promise<XRPointCloud> getPointCloud()
-		Promise<XRLightEstimate> getLightEstimate()
-
+		readonly attribute XRLightEstimate lightEstimate;
+		
 		long addAnchor(XRAnchor anchor);
 		void removeAnchor(long id);
 		XRAnchor? getAnchor(long id);
@@ -116,6 +124,9 @@
 
 		XRDisplayPose? getDisplayPose(XRCoordinateSystem coordinateSystem);
 	};
+
+
+- access camera image buffer aor texture
 
 ## XRView
 
@@ -135,10 +146,18 @@
 		readonly attribute long height;
 	};
 
+## XRCartographicCoordinates
+
+	interface XRCartographicCoordinates {
+		attribute float latitude;
+		attribute float longitude;
+		attribute float altitude;
+	}
+
 ## XRCoordinateSystem
 
-	interface XRCoordinateSystem: EventTarget {
-		readonly attribute Coordinates? coordinates; // https://dev.w3.org/geo/api/spec-source.html#coordinates
+	interface XRCoordinateSystem {
+		readonly attribute XRCartographicCoordinates? mapLocation;
 
 		Float32Array? getTransformTo(XRCoordinateSystem other);
 	};
@@ -146,11 +165,11 @@
 ## XRCoordinates
 
 	interface XRCoordinates {
-		readonly attribute XRCoordinateSystem
+		attribute XRCoordinateSystem;
 		attribute float x;
 		attribute float y;
 		attribute float z;
-	}
+	};
 
 ## XRDisplayPose
 
