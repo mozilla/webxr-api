@@ -203,7 +203,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 ## XRCoordinateSystem
 
 	interface XRCoordinateSystem {
-		readonly attribute XRCartographicCoordinates? mapLocation;
+		readonly attribute XRCartographicCoordinates? cartographicCoordinates;
 
 		Float32Array? getTransformTo(XRCoordinateSystem other);
 	};
