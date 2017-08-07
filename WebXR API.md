@@ -115,10 +115,7 @@ A script can request an empty Reality from the session in order to create a full
 
 	interface XRAnchor {
 		readonly attribute DOMString uid;
-		readonly attribute XRCoordinateSystem coordinateSystem;
-		readonly attribute double x;
-		readonly attribute double y;
-		readonly attribute double z;
+		readonly attribute XRCoordinates coordinates;
 	}
 
 ## XRPlaneAnchor
@@ -220,10 +217,12 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 ## XRCoordinates
 
 	interface XRCoordinates {
-		attribute XRCoordinateSystem;
+		attribute XRCoordinateSystem coordinateSystem;
 		attribute double x;
 		attribute double y;
 		attribute double z;
+
+		XRCoordinates? getTransformedCoordinates(otherCoordinateSystem)
 	};
 
 ## XRDisplayPose
