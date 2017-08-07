@@ -8,6 +8,8 @@
 		attribute EventHandler ondisplaydisconnect;
 	};
 
+_The interfaces with "VR" in the name have been changed to "XR" to indicate that they are used for both VR and AR._
+
 ## XRDisplay
 
 	interface XRDisplay : EventTarget {
@@ -21,6 +23,8 @@
 	};
 
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
+
+_The VRDevice interface was renamed XRDisplay to denote that it is specifically for graphical display types and not other types of devices._
 
 A Pixel XL could expose several displays: a flat display, a magic window display, a Cardboard display, and a Daydream display.
 
@@ -46,7 +50,7 @@ A PC with no attached HMD could expose single a flat display.
 		attribute Reality reality; // Defaults to most recently used Reality
 
 
-		Reality createEmptyReality();
+		Reality createEmptyReality(DOMString name, boolean shared=false);
 		Promise<sequence <Reality>> getRealities();
 		Promise<boolean> requestRealityChange(Reality reality); // resolves true if the request is accepted
 
@@ -66,11 +70,14 @@ A PC with no attached HMD could expose single a flat display.
 
 A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as access to the frame of reference,  and sampling frames.
 
+_The XRSession plays the same basic role as the VRSession, with the addition of Reality management._
+
 ## Reality
 
 	interface Reality : EventTarget {
 		readonly atttribute DOMString realityName;
 		readonly attribute XRCoordinates stageLocation;
+		readonly attribute isShared; // True if sessions other than the creator can access this Reality
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
 
 		Promise<boolean> changeStageLocation(XRCoordinates coordinates);
@@ -152,6 +159,8 @@ A script can request an empty Reality from the session in order to create a full
 		XRDisplayPose? getDisplayPose(XRCoordinateSystem coordinateSystem);
 	};
 
+_The XRPresentationFrame differs from the VRPresentationFrame with the addition of the point cloud, manifold, light estimates, and anchor management._
+
 ### Todo
 
 - access camera image buffer aor texture
@@ -185,6 +194,8 @@ A script can request an empty Reality from the session in order to create a full
 		attribute double altitudeAccuracy;
 		attribute Float32Array orientation; // quaternion from 0,0,0,1 EUS?
 	}
+
+The XRCartographicCoordinates are used in conjunction with the XRCoordinateSystem to represent a frame of reference that may optionally be positioned in relation to the nearest planet.
 
 ## XRCoordinateSystem
 
