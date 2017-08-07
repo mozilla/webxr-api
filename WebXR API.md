@@ -70,7 +70,11 @@ A PC with no attached HMD could expose single a flat display.
 
 A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as access to the frame of reference,  and sampling frames.
 
-_The XRSession plays the same basic role as the VRSession, with the addition of Reality management._
+The blur event on XRSession, like on VRSession, will be fired when there is no reason to render, for example when the user removes their HMD for a moment but does not terminate the session. Focus will be fired when the user first dons their HMD and then when they return after a blur. Flat screen based displays will fire a focus when they are visible and active and blur when they are not active.
+
+There is a second type of focus and blur on the XRLayer. See below.
+
+_The XRSession plays the same basic role as the VRSession, with the addition of Reality management. The `baseLayer` attribute has been renamed to `layer` because the Reality will now be the rearmost "base" layer with each session using the Reality composited on top._
 
 ## Reality
 
@@ -246,7 +250,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 		attribute EventHandler onblur;
 	};
 
-The focus and blur events are separate from the session events with the same names. The UA selects a single layer at a time to receive focus for input events, usually based on a layer selection action taken by the user.
+The focus and blur events on XRLayer are separate from the session events with the same names. While the session focus and blur are fired when the entire display is active or inactive, the layer focus and blur fire when an individual layer becomes the one and only active layer. The UA selects a single layer at a time to receive focus for input events, usually based on a layer selection action taken by the user.
 
 ### Todo
 
