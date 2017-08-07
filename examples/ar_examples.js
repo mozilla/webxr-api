@@ -35,7 +35,7 @@ class ARSetupExample {
 	}
 
 	handleFrame(frame){
-		this.session.requestFrame(frame => { this.handleFrame(frame) })
+		throw 'Extending classes must implement this'
 	}
 }
 
@@ -44,7 +44,7 @@ class ARAnchorExample extends ARSetupExample {
 	constructor(){
 		super()
 		this.anchorsToAdd = [] // { node, x, y, z }
-		this.anchoredNodes = []
+		this.anchoredNodes = [] // { anchorUID, node }
 	}
 
 	addAnchoredModel(sceneGraphNode, x, y, z){
@@ -56,21 +56,22 @@ class ARAnchorExample extends ARSetupExample {
 	}
 
 	handleFrame(frame){
-		super.handleFrame(frame)
+		this.session.requestFrame(frame => { this.handleFrame(frame) })
 
+		// Create new anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
 			const anchor = new XRAnchor(new XRCoordinates(this.frameOfReference, x, y, z))
-			const anchorId = frame.addAnchor(anchor)
+			const anchorUID = frame.addAnchor(anchor)
 			this.anchoredModels.push({
-				anchorId: anchorId,
+				anchorUID: anchorUID,
 				node: anchorToAdd.node
 			})
 		}
 		this.anchorsToAdd = []
 		
-		// update model position in the scene graph using anchors
+		// Update anchored node positions in the scene graph
 		for(let anchoredNode of this.anchoredNodes){
-			const anchor = frame.getAnchor(anchoredNode.anchorId)
+			const anchor = frame.getAnchor(anchoredNode.anchorUID)
 			if(anchor === null){
 				console.error('Unknown anchor ID', anchoredNode.anchorId)
 			} else {
@@ -80,7 +81,7 @@ class ARAnchorExample extends ARSetupExample {
 			}
 		}
 
-		// render into this.session.layer.context
+		// Render into this.session.layer.context
 
 	}
 }

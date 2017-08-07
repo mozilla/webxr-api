@@ -222,8 +222,9 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 		attribute double y;
 		attribute double z;
 
-		XRCoordinates? getTransformedCoordinates(otherCoordinateSystem)
+		XRCoordinates? getTransformedCoordinates(XRCoordinateSystem otherCoordinateSystem, XRCoordinates resultXRCoordinates=null) 
 	};
+
 
 ## XRDisplayPose
 
@@ -237,12 +238,15 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 
 	interface XRLayer : EventTarget {
 		readonly attribute boolean hasFocus;
+ 
+		Promise<boolean> requestFocus(); // True if focus is already on this layer or is changed to this layer
+		Promise<boolean> requestBlur(); // True if this layer does not have focus or is changed to no longer have focus
 
 		attribute EventHandler onfocus;
 		attribute EventHandler onblur;
 	};
 
-The focus and blur events are separate from the session events with the same names. The UA selects a single layer at a time to receive focus for input events, usually based on actions taken by the user.
+The focus and blur events are separate from the session events with the same names. The UA selects a single layer at a time to receive focus for input events, usually based on a layer selection action taken by the user.
 
 ### Todo
 
