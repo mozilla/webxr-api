@@ -80,6 +80,8 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 		readonly attribute isShared; // True if sessions other than the creator can access this Reality
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
 
+		Promise<XRLayer?> requestLayer(); // Null if the UA refuses access from this script context to the layer for this reality
+
 		Promise<boolean> changeStageLocation(XRCoordinates coordinates);
 		Promise<boolean> resetStageLocation();
 
@@ -88,9 +90,9 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 
 A Reality represents a view of the world, be it the real world via sensors or a virtual world that is rendered with WebGL or WebGPU.
 
-Realities can be shared among XRSessions, with multiple scripts rendering into their separate XRLayer.context that are then composited by the UA with the Reality being the rearmost layer.
+Realities can be shared among XRSessions, with multiple scripts rendering into their separate XRLayer.context that are then composited by the UA with the Reality layer being the rearmost layer.
 
-A script can request an empty Reality from the session in order to create a fully virtual environment.
+A script can request an empty Reality from the session in order to create a fully virtual environment by requesting and then rendering into the Reality's XRLayer.
 
 ### Todo
 - Need to expose the stage origin and bounds
