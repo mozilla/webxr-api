@@ -51,6 +51,8 @@ A PC with an attached HMD could expose a flat display and the HMD.
 
 A PC with no attached HMD could expose single a flat display.
 
+A Hololens could expose a single passthrough display.
+
 ### Todo
 
 - calibration
@@ -93,7 +95,7 @@ The blur event on XRSession, like on VRSession, will be fired when there is no r
 
 There is a second type of focus and blur on the XRLayer. See below.
 
-_The XRSession plays the same basic role as the VRSession, with the addition of Reality management. The `baseLayer` attribute has been renamed to `layer` because the Reality will now be the rearmost "base" layer with each session using the Reality composited on top._
+_The XRSession plays the same basic role as the VRSession, with the addition of Reality management. The `baseLayer` attribute has been renamed to `layer` because the Reality will now be the rearmost "base" layer with the XRLayer of each session composited on top._
 
 ## Reality
 
@@ -144,7 +146,7 @@ A script can request an empty Reality from the session in order to create a full
 ## XRPlaneAnchor
 
 	interface XRPlaneAnchor : XRAnchor {
-		readonly attribute Float32Array orientation; // quaternion?
+		readonly attribute Float32Array orientation; // quaternion x,y,z,w
 		readonly attribute double width;
 		readonly attribute double length;
 	}
@@ -214,7 +216,7 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 		attribute double positionAccuracy;
 		attribute double altitude;
 		attribute double altitudeAccuracy;
-		attribute Float32Array orientation; // quaternion from 0,0,0,1 EUS?
+		attribute Float32Array orientation; // quaternion x,y,z,w from 0,0,0,1 of East/Up/South 
 	}
 
 The XRCartographicCoordinates are used in conjunction with the XRCoordinateSystem to represent a frame of reference that may optionally be positioned in relation to the nearest planet.
