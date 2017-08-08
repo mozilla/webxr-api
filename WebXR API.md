@@ -1,3 +1,22 @@
+# WebXR draft (do not implement)
+
+This document is based off of the [Editor's draft of WebVR](https://w3c.github.io/webvr/spec/latest/), modified to support both VR and AR.
+
+The major concepts are:
+
+*XRDisplay*: a particular device and method for rendering XR layers (e.g. Daydream, Vive, Rift, Hololens, GearVR, Cardboard, or magic window)
+
+*Reality*: the rearmost layer shown in a display (e.g. reality in a passthrough display, a virtual reality in a HMD, a camera view in a magic window)
+
+*XRSession*: a script context's interface to rendering onto a single layer and requesting changes to the current Reality
+
+*XRLayer*: Each XRSession and Reality has an XRLayer which exposes the particular context (e.g. a WebGL context) for rendering.
+
+*XRPresentationFrame*: Information needed to render a single graphics frame into a layer, including pose information, as well as sensor data like cloud points or anchor positions.
+
+The typical application will request an XRSession from an XRDisplay, request a change to the Reality if necessary, then repeatedly request a XRPresentationFrame with which to render into the XRSession's single XRLayer.
+
+The compositor will render from back to front: the Reality layer, then each session's layer, and then any UA controls that should overlay the other layers. The UA will be in control of which Reality is active, the render order of the session layers, and which of the layers will receive the user's input events.
 
 ## XR
 
