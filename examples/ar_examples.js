@@ -25,6 +25,7 @@ class ARSetupExample {
 		this.session.requestFrameOfReference('spatial').then(frameOfReference => {
 			if(frameOfReference === null){
 				console.error('no spatial frame of reference')
+				this.session.endSession()
 				return
 			}
 

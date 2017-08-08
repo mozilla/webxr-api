@@ -32,6 +32,8 @@ class VRSetupExample {
 		this.session.requestRealityChange(reality).then(changed => {
 			if(changed === false){
 				console.error('Could not change realities')
+				// While some applications could use any Reality, this VR session requires its own so end the session if it isn't available.
+				this.session.endSession()
 				return
 			}
 
