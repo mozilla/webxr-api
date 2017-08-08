@@ -10,9 +10,9 @@ The major concepts are:
 
 *XRSession*: a script context's interface to rendering onto a single layer and requesting changes to the current Reality
 
-*XRLayer*: Each XRSession and Reality has an XRLayer which exposes the particular context (e.g. a WebGL context) for rendering.
+*XRLayer*: Each XRSession and Reality has an XRLayer that exposes the particular context (e.g. a WebGL context) for rendering.
 
-*XRPresentationFrame*: Information needed to render a single graphics frame into a layer, including pose information, as well as sensor data like cloud points or anchor positions.
+*XRPresentationFrame*: Information needed to render a single graphics frame into a layer, including pose information, as well as sensor data like point clouds and anchors.
 
 The typical application will request an XRSession from an XRDisplay, request a change to the Reality if necessary, then repeatedly request a XRPresentationFrame with which to render into the XRSession's single XRLayer.
 
