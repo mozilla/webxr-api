@@ -29,14 +29,7 @@ class VRSetupExample {
 		const reality = this.session.createEmptyReality('VR Example', false)
 
 		// Request that this session use the new Reality
-		this.session.requestRealityChange(reality).then(changed => {
-			if(changed === false){
-				console.error('Could not change realities')
-				// While some applications could use any Reality, this VR session requires its own so end the session if it isn't available.
-				this.session.endSession()
-				return
-			}
-
+		this.session.requestRealityChange(reality).then(() => {
 			// Request the Reality's XRLayer so that we can render into it
 			reality.requestLayer().then(layer => {
 				// because this script context created it, layer will always be non-null
@@ -45,6 +38,11 @@ class VRSetupExample {
 
 			// Now start requesting frames
 			this.session.requestFrame(frame => { this.handleFrame(frame) })
+		}).catch(err => {
+			console.error('Could not change realities', err)
+			// While some applications could use any Reality, this VR session requires its own so end the session if it isn't available.
+			this.session.endSession()
+			return
 		})
 	}
 

@@ -73,7 +73,7 @@ A Hololens could expose a single passthrough display.
 
 		Reality createEmptyReality(DOMString name, boolean shared=false);
 		Promise<sequence <Reality>> getRealities();
-		Promise<boolean> requestRealityChange(Reality reality); // resolves true if the request is accepted
+		Promise<void> requestRealityChange(Reality reality);
 
 		Promise<XRFrameOfReference?> requestFrameOfReference(XRFrameOfReferenceType type);
 
@@ -107,8 +107,8 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 
 		Promise<XRLayer?> requestLayer(); // Null if the UA refuses access from this script context to the layer for this reality
 
-		Promise<boolean> changeStageLocation(XRCoordinates coordinates);
-		Promise<boolean> resetStageLocation();
+		Promise<void> changeStageLocation(XRCoordinates coordinates);
+		Promise<void> resetStageLocation();
 
 		attribute EventHandler onchange;
 	};
@@ -264,8 +264,8 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 	interface XRLayer : EventTarget {
 		readonly attribute boolean hasFocus;
  
-		Promise<boolean> requestFocus(); // True if focus is already on this layer or is changed to this layer
-		Promise<boolean> requestBlur(); // True if this layer does not have focus or is changed to no longer have focus
+		Promise<void> requestFocus();
+		Promise<void> requestBlur();
 
 		attribute EventHandler onfocus;
 		attribute EventHandler onblur;

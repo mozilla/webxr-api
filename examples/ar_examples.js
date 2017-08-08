@@ -23,16 +23,13 @@ class ARSetupExample {
 	handleNewSession(session){
 		this.session = session
 		this.session.requestFrameOfReference('spatial').then(frameOfReference => {
-			if(frameOfReference === null){
-				console.error('no spatial frame of reference')
-				this.session.endSession()
-				return
-			}
-
 			// The session's reality defaults to the most recently used shared reality,  which is fine for this app
 			this.session.requestFrame(frame => { this.handleFrame(frame) })
+		}).catch(err => {
+			console.error('no spatial frame of reference')
+			this.session.endSession()
+			return
 		})
-
 	}
 
 	handleFrame(frame){
