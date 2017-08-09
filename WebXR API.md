@@ -128,7 +128,7 @@ A script can request an empty Reality from the session in order to create a full
 ## XRPointCloud
 
 	interface XRPointCloud {
-		readonly attribute Float32Array points;
+		readonly attribute Float32Array points; // x , y, z, confidence in range 0,1
 	}
 
 ## XRLightEstimate
