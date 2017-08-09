@@ -54,8 +54,8 @@ class VRSetupExample {
 		// Request the frame after this one
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
 
-		// Different apps require different coordinate systems, but let's assume this one will work with stage or headModel frames of reference
-		let coordinateSystem = this.frame.getCoordinateSystem('stage', 'headModel')
+		// Different apps require different coordinate systems, but let's assume this one will work with stage or eyeLevel frames of reference
+		let coordinateSystem = this.frame.getCoordinateSystem('stage', 'eyeLevel')
 		if(coordinateSystem === null){
 			console.error('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)

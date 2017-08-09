@@ -49,8 +49,8 @@ class ARAnchorExample extends ARSetupExample {
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
 
-		// Different apps require different coordinate systems, but let's assume this one will work with spatial, stage, or headModel
-		let coordinateSystem = this.frame.getCoordinateSystem('spatial', 'stage', 'headModel')
+		// Different apps require different coordinate systems, but let's assume this one will work with spatial, stage, or eyeLevel
+		let coordinateSystem = this.frame.getCoordinateSystem('spatial', 'stage', 'eyeLevel')
 		if(coordinateSystem === null){
 			console.error('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
