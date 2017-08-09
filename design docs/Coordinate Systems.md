@@ -4,7 +4,7 @@
 - Reality: StageBounds
 - Anchor: Coordinates
 - PlaneAnchor(Anchor): orientation, width, height
-- PointCloud: Array of [x,y,z]
+- PointCloud: Array of points [x,y,z]
 - Manifold: ?
 
 ### Frame info
@@ -28,3 +28,16 @@
 ### Scene graph
 
 - Scene coordinates: local, world, camera, projection
+
+
+### References
+
+- https://developer.microsoft.com/en-us/windows/mixed-reality/coordinate_systems
+- https://developer.microsoft.com/en-us/windows/mixed-reality/spatial_anchors
+
+- https://developers.google.com/tango/overview/motion-tracking
+- https://developers.google.com/tango/overview/frames-of-reference
+
+- https://developer.apple.com/documentation/arkit/ (no frames of reference or spatial coordinates?)
+
+- https://dev.w3.org/geo/api/spec-source.html#coordinates

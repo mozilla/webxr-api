@@ -57,6 +57,7 @@ A Hololens could expose a single passthrough display.
 
 - calibration
 - orientation reset
+- what to do about area description files?
 
 ## XRSession
 
