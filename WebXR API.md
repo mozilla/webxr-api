@@ -157,6 +157,20 @@ A script can request an empty Reality from the session in order to create a full
 		TBD
 	}
 
+## XRStageBounds
+
+	interface XRStageBounds {
+		readonly attribute FrozenArray<XRStageBoundsPoint> geometry;
+	};
+
+## XRStageBoundsPoint 
+
+	interface XRStageBoundsPoint {
+		readonly attribute double x;
+		readonly attribute double z;
+	};
+
+
 ### Todo
 
 - expose the manifold vertices and edges as well as its extent (FOV only, full sphere, etc)
