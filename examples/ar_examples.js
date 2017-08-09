@@ -61,6 +61,7 @@ class ARAnchorExample extends ARSetupExample {
 			console.error('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
 			this.session.endSession()
+			// Alternatively, the app could render a 'waiting for map' message and keep checking for an acceptable coordinate system
 			return
 		}
 
