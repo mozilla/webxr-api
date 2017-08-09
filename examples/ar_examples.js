@@ -49,14 +49,8 @@ class ARAnchorExample extends ARSetupExample {
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
 
-		// Different apps require different coordinate systems, but let's assume this one will work as long as there is at least head pose info.
-		let coordinateSystem = this.frame.getCoordinateSystem('spatial')
-		if(coordinateSystem === null){
-			coordinateSystem = this.frame.getCoordinateSystem('stage')
-		}
-		if(coordinateSystem === null){
-			coordinateSystem = this.frame.getCoordinateSystem('headModel')
-		}
+		// Different apps require different coordinate systems, but let's assume this one will work with spatial, stage, or headModel
+		let coordinateSystem = this.frame.getCoordinateSystem('spatial', 'stage', 'headModel')
 		if(coordinateSystem === null){
 			console.error('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
@@ -84,7 +78,7 @@ class ARAnchorExample extends ARSetupExample {
 			} else {
 				const localCoordinates = anchor.coordinates.getTransformedCoordinates(coordinateSystem)
 				anchoredNode.node.position.set(localCoordinates.x, localCoordinates.y, localCoordinates.z)
-				// TBD figure out how to use orientation across coordinate systems
+				// TBD use orientation across coordinate systems
 			}
 		}
 

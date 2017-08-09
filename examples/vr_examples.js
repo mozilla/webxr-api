@@ -32,8 +32,12 @@ class VRSetupExample {
 		this.session.requestRealityChange(reality).then(() => {
 			// Request the Reality's XRLayer so that we can render into it
 			reality.requestLayer().then(layer => {
-				// because this script context created it, layer will always be non-null
 				this.realityLayer = layer
+			}).catch(err => {
+				// This shouldn't happen because this script context created the Reality and should have access to the layer
+				console.error('Error requesting the Reality layer', err)
+				this.session.endSession()
+				return
 			})
 
 			// Now start requesting frames
@@ -48,7 +52,18 @@ class VRSetupExample {
 
 	handleFrame(frame){
 		// Request the frame after this one
-		this.session.requestFrame(frame => { this.handleFrame(frame) })
+		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
+
+		// Different apps require different coordinate systems, but let's assume this one will work with stage or headModel frames of reference
+		let coordinateSystem = this.frame.getCoordinateSystem('stage', 'headModel')
+		if(coordinateSystem === null){
+			console.error('Could not get a usable coordinate system')
+			this.session.cancelFrame(nextFrameRequest)
+			this.session.endSession()
+			// Alternatively, the app could render a 'waiting for map' message and keep checking for an acceptable coordinate system
+			return
+		}
+
 
 		// Render into this.realityLayer.context using a WebGL lib like Three.js
 
