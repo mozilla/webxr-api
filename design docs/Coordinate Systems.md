@@ -1,7 +1,7 @@
 
-## Reality based info
+## Reality info
 
-- Reality: stage Coordinates
+- Reality: StageBounds
 - Anchor: Coordinates
 - PlaneAnchor(Anchor): orientation, width, height
 - PointCloud: Array of [x,y,z]
@@ -16,15 +16,14 @@
 
 ### Coordinate info
 
-- CartographicCoordinates: lat/lon/alt, accuracy
+- CartographicCoordinates: lat/lon/alt, accuracy, type (display, reality), geodeticFrame (WGS84)
+- CoordinateSystem: CartographicCoordinates?, type (headModel, eyeLevel, stage, spatial)
 - Coordinates: CoordinateSystem, x/y/z
-- CoordinateSystem: CartographicCoordinates?
-- FrameOfReference(CoordinateSystem): StageBounds, type (headModel, eyeLevel, stage, spatial)
-- StageBounds: array of [x,y]
+- StageBounds: XRCoordinate center, optional array of [x,y] points on stage plane
 
 ### Rendering
 
-- Layer: GL context, GL frame buffer, fb width/height
+- Layer: GL context, GL frame buffer with width and height
 
 ### Scene graph
 

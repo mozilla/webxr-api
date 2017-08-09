@@ -102,7 +102,7 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
 		readonly attribute isShared; // True if sessions other than the creator can access this Reality
-		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
+		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a full VR
 
 		Promise<XRLayer> requestLayer(); // Throws if the UA refuses access from this script context to the layer for this reality
 
@@ -165,8 +165,8 @@ A script can request an empty Reality from the session in order to create a full
 ## XRStageBounds
 
 	interface XRStageBounds {
-		readonly attribute XRCoordinates origin;
-		readonly attribute FrozenArray<XRStageBoundsPoint> geometry;
+		readonly attribute XRCoordinates center;
+		readonly attribute FrozenArray<XRStageBoundsPoint>? geometry;
 	};
 
 ## XRStageBoundsPoint 
@@ -249,7 +249,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 
 ## XRCoordinateSystem
 
-	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage", "spatial" };
+	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage", "spatial" }; // Should these be Symbols instead of strings?
 
 	interface XRCoordinateSystem {
 		readonly attribute XRCartographicCoordinates? cartographicCoordinates;

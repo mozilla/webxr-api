@@ -4,7 +4,6 @@ class ARSetupExample {
 	constructor(){
 		this.display = null
 		this.session = null
-		this.frameOfReference = null
 
 		navigator.XR.getDisplays().then(displays => {
 			if(displays.length == 0) {
@@ -22,14 +21,8 @@ class ARSetupExample {
 
 	handleNewSession(session){
 		this.session = session
-		this.session.requestFrameOfReference('spatial').then(frameOfReference => {
-			// The session's reality defaults to the most recently used shared reality,  which is fine for this app
-			this.session.requestFrame(frame => { this.handleFrame(frame) })
-		}).catch(err => {
-			console.error('no spatial frame of reference')
-			this.session.endSession()
-			return
-		})
+		// The session's reality defaults to the most recently used shared reality,  which is fine for this app
+		this.session.requestFrame(frame => { this.handleFrame(frame) })
 	}
 
 	handleFrame(frame){
@@ -54,11 +47,26 @@ class ARAnchorExample extends ARSetupExample {
 	}
 
 	handleFrame(frame){
-		this.session.requestFrame(frame => { this.handleFrame(frame) })
+		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
+
+		// Different apps require different coordinate systems, but let's assume this one will work as long as there is at least head pose info.
+		let coordinateSystem = this.frame.getCoordinateSystem('spatial')
+		if(coordinateSystem === null){
+			coordinateSystem = this.frame.getCoordinateSystem('stage')
+		}
+		if(coordinateSystem === null){
+			coordinateSystem = this.frame.getCoordinateSystem('headModel')
+		}
+		if(coordinateSystem === null){
+			console.error('Could not get a usable coordinate system')
+			this.session.cancelFrame(nextFrameRequest)
+			this.session.endSession()
+			return
+		}
 
 		// Create new anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
-			const anchor = new XRAnchor(new XRCoordinates(this.frameOfReference, x, y, z))
+			const anchor = new XRAnchor(new XRCoordinates(coordinateSystem, x, y, z))
 			const anchorUID = frame.addAnchor(anchor)
 			this.anchoredModels.push({
 				anchorUID: anchorUID,
@@ -73,7 +81,7 @@ class ARAnchorExample extends ARSetupExample {
 			if(anchor === null){
 				console.error('Unknown anchor ID', anchoredNode.anchorId)
 			} else {
-				const localCoordinates = anchor.coordinates.getTransformedCoordinates(this.frameOfReference)
+				const localCoordinates = anchor.coordinates.getTransformedCoordinates(coordinateSystem)
 				anchoredNode.node.position.set(localCoordinates.x, localCoordinates.y, localCoordinates.z)
 				// TBD figure out how to use orientation across coordinate systems
 			}
