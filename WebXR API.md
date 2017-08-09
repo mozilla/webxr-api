@@ -72,10 +72,8 @@ A Hololens could expose a single passthrough display.
 
 
 		Reality createEmptyReality(DOMString name, boolean shared=false);
-		Promise<sequence <Reality>> getRealities();
+		sequence <Reality> getRealities();
 		Promise<void> requestRealityChange(Reality reality);
-
-		Promise<XRFrameOfReference?> requestFrameOfReference(XRFrameOfReferenceType type);
 
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
@@ -101,16 +99,20 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 
 	interface Reality : EventTarget {
 		readonly atttribute DOMString realityName;
-		readonly attribute XRCoordinates stageLocation;
+		readonly attribute boolean hasStageBounds;
+		readonly attribute XRStageBounds? stageBounds;
 		readonly attribute isShared; // True if sessions other than the creator can access this Reality
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a fully VR
 
-		Promise<XRLayer?> requestLayer(); // Null if the UA refuses access from this script context to the layer for this reality
+		Promise<XRLayer> requestLayer(); // Throws if the UA refuses access from this script context to the layer for this reality
+
+		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type);
 
 		Promise<void> changeStageLocation(XRCoordinates coordinates);
 		Promise<void> resetStageLocation();
 
 		attribute EventHandler onchange;
+		attribute EventHandler onboundschange;
 	};
 
 A Reality represents a view of the world, be it the real world via sensors or a virtual world that is rendered with WebGL or WebGPU.
@@ -120,7 +122,6 @@ Realities can be shared among XRSessions, with multiple scripts rendering into t
 A script can request an empty Reality from the session in order to create a fully virtual environment by requesting and then rendering into the Reality's XRLayer.
 
 ### Todo
-- Need to expose the stage origin and bounds
 - configuration (e.g. change white balance on camera input, change options on map view)
 
 ## XRPointCloud
@@ -157,9 +158,14 @@ A script can request an empty Reality from the session in order to create a full
 		TBD
 	}
 
+### Todo
+
+- expose the manifold vertices and edges as well as its extent (FOV only, full sphere, etc)
+
 ## XRStageBounds
 
 	interface XRStageBounds {
+		readonly attribute XRCoordinates origin;
 		readonly attribute FrozenArray<XRStageBoundsPoint> geometry;
 	};
 
@@ -170,31 +176,28 @@ A script can request an empty Reality from the session in order to create a full
 		readonly attribute double z;
 	};
 
-
-### Todo
-
-- expose the manifold vertices and edges as well as its extent (FOV only, full sphere, etc)
-
 ## XRPresentationFrame
 
 	interface XRPresentationFrame {
 		readonly attribute FrozenArray<XRView> views;
 
 		readonly attribute boolean hasPointCloud;
-		readonly attribute XRPointCloud pointCloud;
+		readonly attribute XRPointCloud? pointCloud;
 
 		readonly attribute boolean hasManifold;
-		readonly attribute XRManifold manifold;
+		readonly attribute XRManifold? manifold;
 
 		readonly attribute boolean hasLightEstimate;
-		readonly attribute XRLightEstimate lightEstimate;
-		
+		readonly attribute XRLightEstimate? lightEstimate;
+
 		long addAnchor(XRAnchor anchor);
 		void removeAnchor(DOMString uid);
 		XRAnchor? getAnchor(DOMString uid);
 		<sequence <XRAnchor>> getAnchors();
 
-		XRDisplayPose? getDisplayPose(XRCoordinateSystem coordinateSystem);
+		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type);
+
+		XRViewPose? getViewPose(XRCoordinateSystem coordinateSystem);
 	};
 
 _The XRPresentationFrame differs from the VRPresentationFrame with the addition of the point cloud, manifold, light estimates, and anchor management._
@@ -224,7 +227,12 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 
 ## XRCartographicCoordinates
 
+	enum XRCartographicCoordinatesType { "display", "reality" };
+	enum XRCartographicCoordinatesGeodeticFrame { "WGS84" };
+
 	interface XRCartographicCoordinates {
+		attribute XRCartographicCoordinatesType type;
+		attribute XRCartographicCoordinatesGeodeticFrame? geodeticFrame;
 		attribute double latitude;
 		attribute double longitude;
 		attribute double positionAccuracy;
@@ -233,23 +241,21 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 		attribute Float32Array orientation; // quaternion x,y,z,w from 0,0,0,1 of East/Up/South 
 	}
 
-The XRCartographicCoordinates are used in conjunction with the XRCoordinateSystem to represent a frame of reference that may optionally be positioned in relation to the nearest planet.
+The XRCartographicCoordinates are used in conjunction with the XRCoordinateSystem to represent a frame of reference that may optionally be positioned in relation to a geodetic frame like WGS84 for Earth, otherwise a sphere is assumed.
+
+### TODO
+
+- find geodetic frames for other planets and moons in this solar system
 
 ## XRCoordinateSystem
 
-	interface XRCoordinateSystem {
-		readonly attribute XRCartographicCoordinates? cartographicCoordinates;
-
-		Float32Array? getTransformTo(XRCoordinateSystem other);
-	};
-
-## XRFrameOfReference
-
 	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage", "spatial" };
 
-	interface XRFrameOfReference : XRCoordinateSystem {
-		readonly attribute XRStageBounds? bounds;
-		attribute EventHandler onboundschange;
+	interface XRCoordinateSystem {
+		readonly attribute XRCartographicCoordinates? cartographicCoordinates;
+		readonly attribute XRFrameOfReferenceType type;
+
+		Float32Array? getTransformTo(XRCoordinateSystem other);
 	};
 
 
@@ -265,9 +271,9 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 	};
 
 
-## XRDisplayPose
+## XRViewPose
 
-	interface XRDisplayPose {
+	interface XRViewPose {
 		readonly attribute Float32Array poseModelMatrix;
 
 		Float32Array getViewMatrix(XRView view);
