@@ -73,8 +73,8 @@ class ARExampleBase {
 
 		let animate = function(){
 			requestAnimationFrame(animate)
-			this.scene.children[0].rotation.x += 0.005;
-			this.scene.children[0].rotation.y += 0.01;
+			this.scene.children[0].rotation.x += 0.005
+			this.scene.children[0].rotation.y += 0.01
 			this.renderer.render(this.scene, this.camera)
 		}.bind(this)
 		requestAnimationFrame(animate)
@@ -137,7 +137,7 @@ class ARExampleBase {
 			return
 		}
 
-		let pose = frame.getViewPose(coordinateSystem);
+		let pose = frame.getViewPose(coordinateSystem)
 
 		this.updateScene(frame, coordinateSystem, pose)
 
@@ -147,7 +147,7 @@ class ARExampleBase {
 		this.renderer.setSize(this.session.layer.frameBufferWidth, this.session.layer.frameBufferWidth)
 		this.renderer.clear()
 
-		this.session.layer.context.bindFramebuffer(this.session.layer.framebuffer);
+		this.session.layer.context.bindFramebuffer(this.session.layer.framebuffer)
 
 		// Render each view into this.session.layer.context
 		for(const view of frame.views){
@@ -164,8 +164,8 @@ class ARExampleBase {
 class ARSimplestExample extends ARExampleBase {
 	updateScene(frame, coordinateSystem, pose){
 		// Spin the cube to show this method is called
-		this.scene.children[0].rotation.x += 0.005;
-		this.scene.children[0].rotation.y += 0.01;
+		this.scene.children[0].rotation.x += 0.005
+		this.scene.children[0].rotation.y += 0.01
 	}
 }
 
