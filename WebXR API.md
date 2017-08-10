@@ -74,7 +74,6 @@ A Hololens could expose a single passthrough display.
 		attribute XRLayer layer;
 		attribute Reality reality; // Defaults to most recently used Reality
 
-
 		Reality createVirtualReality(DOMString name, boolean shared=false);
 		sequence <Reality> getRealities();
 		Promise<void> requestRealityChange(Reality reality);
@@ -89,6 +88,8 @@ A Hololens could expose a single passthrough display.
 		attribute EventHandler onresetpose;
 		attribute EventHandler onended;
 		attribute EventHandler onrealitychanged;
+		attribute EventHandler onrealityconnect;
+		attribute EventHandler onrealitydisconnect;
 	};
 
 A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as access to the frame of reference,  and sampling frames.
@@ -158,7 +159,6 @@ A script can request an virtual Reality from the session in order to create a fu
 ## XRPlaneAnchor
 
 	interface XRPlaneAnchor : XRAnchor {
-		readonly attribute Float32Array orientation; // quaternion x,y,z,w
 		readonly attribute double width;
 		readonly attribute double length;
 	}
@@ -238,11 +238,9 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 
 ## XRCartographicCoordinates
 
-	enum XRCartographicCoordinatesType { "display", "reality" };
 	enum XRCartographicCoordinatesGeodeticFrame { "WGS84" };
 
 	interface XRCartographicCoordinates {
-		attribute XRCartographicCoordinatesType type;
 		attribute XRCartographicCoordinatesGeodeticFrame? geodeticFrame;
 		attribute double latitude;
 		attribute double longitude;
@@ -260,7 +258,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 
 ## XRCoordinateSystem
 
-	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage", "spatial" }; // Should these be Symbols instead of strings?
+	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage", "geospatial" };
 
 	interface XRCoordinateSystem {
 		readonly attribute XRCartographicCoordinates? cartographicCoordinates;
@@ -274,9 +272,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 
 	interface XRCoordinates {
 		attribute XRCoordinateSystem coordinateSystem;
-		attribute double x;
-		attribute double y;
-		attribute double z;
+		readonly attribute Float32Array poseMatrix;
 
 		XRCoordinates? getTransformedCoordinates(XRCoordinateSystem otherCoordinateSystem, XRCoordinates resultXRCoordinates=null) 
 	};

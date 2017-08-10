@@ -3,7 +3,7 @@
 
 class ARSimplestExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['reality', 'stage', 'eyeLevel'], false)
+		super(domElement, ['geospatial', 'stage', 'eyeLevel'], false)
 	}
 
 	// Called during construction
@@ -21,7 +21,7 @@ class ARSimplestExample extends XRExampleBase {
 
 class ARAnchorExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['reality', 'stage', 'eyeLevel'], false)
+		super(domElement, ['geospatial', 'stage', 'eyeLevel'], false)
 		this.anchorsToAdd = [] // { node, x, y, z }
 		this.anchoredNodes = [] // { anchorUID, node }
 	}
@@ -46,7 +46,7 @@ class ARAnchorExample extends XRExampleBase {
 	updateScene(frame, coordinateSystem, pose){
 		// Create anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
-			const anchor = new XRAnchor(new XRCoordinates(coordinateSystem, x, y, z))
+			const anchor = new XRAnchor(new XRCoordinates(coordinateSystem, [x, y, z], [0, 0, 0, 1]))
 			const anchorUID = frame.addAnchor(anchor)
 			this.anchoredModels.push({
 				anchorUID: anchorUID,
@@ -62,8 +62,7 @@ class ARAnchorExample extends XRExampleBase {
 				console.error('Unknown anchor ID', anchoredNode.anchorId)
 			} else {
 				const localCoordinates = anchor.coordinates.getTransformedCoordinates(coordinateSystem)
-				anchoredNode.node.position.set(localCoordinates.x, localCoordinates.y, localCoordinates.z)
-				// TODO use orientation across coordinate systems
+				anchoredNode.node.fromArray(localCoordinates.poseMatrix)
 			}
 		}
 	}
