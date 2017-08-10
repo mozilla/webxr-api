@@ -1,0 +1,28 @@
+<html>
+	<head>
+		<title>AR examples</title>
+		<meta charset="utf-8">
+
+		<style>
+			#target {
+				background-color: #EFEFEF;
+				border-color: #DDD;
+				width: 600px;
+				height: 400px;
+				padding: 10px;
+			}
+		</style>
+
+		<script src="three.min.js"></script>
+		<script src="common_examples.js"></script>
+		<script src="ar_examples.js"></script>
+	</head>
+	<body>
+		<h1>AR Examples</h1>
+		<div id="target" />
+
+		<script>
+			let anchorExample = new ARSimplestExample(document.getElementById('target'))
+		</script>
+	</body>
+</html>

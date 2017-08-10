@@ -107,7 +107,7 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 
 		Promise<XRLayer> requestLayer(); // Throws if the UA refuses access from this script context to the layer for this reality
 
-		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type ...); // Tries the types in order, returning the first match or null if none is found
+		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type, ...); // Tries the types in order, returning the first match or null if none is found
 
 		Promise<void> changeStageLocation(XRCoordinates coordinates);
 		Promise<void> resetStageLocation();
@@ -128,7 +128,7 @@ A script can request an empty Reality from the session in order to create a full
 ## XRPointCloud
 
 	interface XRPointCloud {
-		readonly attribute Float32Array points; // x , y, z, confidence in range 0,1
+		readonly attribute Float32Array points; // Each point is [x, y, z, confidence in range 0-1]
 	}
 
 ## XRLightEstimate
@@ -196,7 +196,7 @@ A script can request an empty Reality from the session in order to create a full
 		XRAnchor? getAnchor(DOMString uid);
 		<sequence <XRAnchor>> getAnchors();
 
-		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type ...); // Tries the types in order, returning the first match or null if none is found
+		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type, ...); // Tries the types in order, returning the first match or null if none is found
 
 		XRViewPose? getViewPose(XRCoordinateSystem coordinateSystem);
 	};
