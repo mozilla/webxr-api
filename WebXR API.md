@@ -6,7 +6,7 @@ The major concepts are:
 
 *XRDisplay*: a particular device and method for rendering XR layers (e.g. Daydream, Vive, Rift, Hololens, GearVR, Cardboard, or magic window)
 
-*Reality*: the rearmost layer shown in a display (e.g. reality in a passthrough display, a virtual reality in a HMD, a camera view in a magic window)
+*Reality*: the rearmost layer shown in a display (e.g. the real world in a passthrough display, a virtual reality in a HMD, a camera view in a magic window)
 
 *XRSession*: a script context's interface to rendering onto a single layer and requesting changes to the current Reality
 
@@ -18,6 +18,8 @@ The typical application will request an XRSession from an XRDisplay, request a c
 
 The compositor will render from back to front: the Reality layer, then each session's layer, and then any UA controls that should overlay the other layers. The UA will be in control of which Reality is active, the render order of the session layers, and which of the layers will receive the user's input events.
 
+_"VR" in names have been changed to "XR" to indicate that they are used for both VR and AR._
+
 ## XR
 
 	interface XR {
@@ -26,8 +28,6 @@ The compositor will render from back to front: the Reality layer, then each sess
 		attribute EventHandler ondisplayconnect;
 		attribute EventHandler ondisplaydisconnect;
 	};
-
-_The interfaces with "VR" in the name have been changed to "XR" to indicate that they are used for both VR and AR._
 
 ## XRDisplay
 
