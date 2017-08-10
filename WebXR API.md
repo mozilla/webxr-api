@@ -38,6 +38,9 @@ _The interfaces with "VR" in the name have been changed to "XR" to indicate that
 		Promise<boolean> supportsSession(XRSessionCreateParametersInit parameters);
 		Promise<XRSession> requestSession(XRSessionCreateParametersInit parameters);
 
+		readonly attribute boolean hasStageBounds;
+		readonly attribute XRStageBounds? stageBounds;
+
 		attribute EventHandler ondeactivate;
 	};
 
@@ -72,7 +75,7 @@ A Hololens could expose a single passthrough display.
 		attribute Reality reality; // Defaults to most recently used Reality
 
 
-		Reality createEmptyReality(DOMString name, boolean shared=false);
+		Reality createVirtualReality(DOMString name, boolean shared=false);
 		sequence <Reality> getRealities();
 		Promise<void> requestRealityChange(Reality reality);
 
@@ -112,17 +115,12 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 
 	interface Reality : EventTarget {
 		readonly atttribute DOMString realityName;
-		readonly attribute boolean hasStageBounds;
-		readonly attribute XRStageBounds? stageBounds;
 		readonly attribute isShared; // True if sessions other than the creator can access this Reality
 		readonly attribute isPassthrough; // True if the Reality is a view of the outside world, not a full VR
 
-		Promise<XRLayer> requestLayer(); // Throws if the UA refuses access from this script context to the layer for this reality
+		Promise<void> setLayer(XRLayer layer); // Throws if the UA refuses to change the Reality
 
 		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type, ...); // Tries the types in order, returning the first match or null if none is found
-
-		Promise<void> changeStageLocation(XRCoordinates coordinates);
-		Promise<void> resetStageLocation();
 
 		attribute EventHandler onchange;
 		attribute EventHandler onboundschange;
@@ -132,7 +130,7 @@ A Reality represents a view of the world, be it the real world via sensors or a 
 
 Realities can be shared among XRSessions, with multiple scripts rendering into their separate XRLayer.context that are then composited by the UA with the Reality layer being the rearmost layer.
 
-A script can request an empty Reality from the session in order to create a fully virtual environment by requesting and then rendering into the Reality's XRLayer.
+A script can request an virtual Reality from the session in order to create a fully virtual environment by requesting and then rendering into the Reality's XRLayer.
 
 ### Todo
 - configuration (e.g. change white balance on camera input, change options on map view)
