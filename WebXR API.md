@@ -16,7 +16,9 @@ The major concepts are:
 
 The typical application will request an XRSession from an XRDisplay, request a change to the Reality if necessary, then repeatedly request a XRPresentationFrame with which to render into the XRSession's single XRLayer.
 
-The compositor will render from back to front: the Reality layer, then each session's layer, and then any UA controls that should overlay the other layers. The UA will be in control of which Reality is active, the render order of the session layers, and which of the layers will receive the user's input events.
+Applications that require a dedicated virtual reality can request one from the XRSession and then replace the session's default Reality.
+
+The UA will be in control of which Reality is active, the render order of the session layers, and which of the layers will receive the user's input events.
 
 _"VR" in names have been changed to "XR" to indicate that they are used for both VR and AR._
 
