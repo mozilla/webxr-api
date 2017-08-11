@@ -8,7 +8,7 @@ The major concepts are:
 
 *Reality*: the rearmost layer shown in a display (e.g. the real world in a passthrough display, a virtual reality in a HMD, a camera view in a magic window)
 
-*XRSession*: a script context's interface to rendering onto a single layer and requesting changes to the current Reality
+*XRSession*: an interface to a display for rendering onto a single layer and requesting changes to the current Reality
 
 *XRLayer*: Each XRSession and Reality has an XRLayer that exposes the particular context (e.g. a WebGL context) for rendering.
 
@@ -40,9 +40,6 @@ _"VR" in names have been changed to "XR" to indicate that they are used for both
 		Promise<boolean> supportsSession(XRSessionCreateParametersInit parameters);
 		Promise<XRSession> requestSession(XRSessionCreateParametersInit parameters);
 
-		readonly attribute boolean hasStageBounds;
-		readonly attribute XRStageBounds? stageBounds;
-
 		attribute EventHandler ondeactivate;
 	};
 
@@ -58,11 +55,9 @@ A PC with no attached HMD could expose single a flat display.
 
 A Hololens could expose a single passthrough display.
 
-### Todo
-
-- calibration
-- orientation reset
-- what to do about area description files?
+- How do we support calibration?
+- How do we support orientation reset?
+- What should we do about area description files?
 
 ## XRSession
 
@@ -84,18 +79,22 @@ A Hololens could expose a single passthrough display.
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
+		readonly attribute boolean hasStageBounds;
+		readonly attribute XRStageBounds? stageBounds;
+
 		Promise<void> end();
 
 		attribute EventHandler onblur;
 		attribute EventHandler onfocus;
 		attribute EventHandler onresetpose;
-		attribute EventHandler onended;
 		attribute EventHandler onrealitychanged;
 		attribute EventHandler onrealityconnect;
 		attribute EventHandler onrealitydisconnect;
+		attribute EventHandler onboundschange;
+		attribute EventHandler onended;
 	};
 
-A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as access to the frame of reference,  and sampling frames.
+A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as make a request for an animation frame.
 
 The blur event on XRSession, like on VRSession, will be fired when there is no reason to render, for example when the user removes their HMD for a moment but does not terminate the session. Focus will be fired when the user first dons their HMD and then when they return after a blur. Flat screen based displays will fire a focus when they are visible and active and blur when they are not active.
 
@@ -111,8 +110,6 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 		readonly attribute boolean exclusive;
 	};
 
-### Todo
-
 - 'exclusive' needs to be rethought given the new use of XRDisplay for magic window. Do we still need sessions that just wants sensor data? 
 
 ## Reality
@@ -127,7 +124,6 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type, ...); // Tries the types in order, returning the first match or null if none is found
 
 		attribute EventHandler onchange;
-		attribute EventHandler onboundschange;
 	};
 
 A Reality represents a view of the world, be it the real world via sensors or a virtual world that is rendered with WebGL or WebGPU.
@@ -136,8 +132,7 @@ Realities can be shared among XRSessions, with multiple scripts rendering into t
 
 A script can request an virtual Reality from the session in order to create a fully virtual environment by requesting and then rendering into the Reality's XRLayer.
 
-### Todo
-- configuration (e.g. change white balance on camera input, change options on map view)
+- How do we support configuration (e.g. change white balance on camera input, change options on map view)?
 
 ## XRPointCloud
 
@@ -152,12 +147,16 @@ A script can request an virtual Reality from the session in order to create a fu
 		readonly attribute double ambientColorTemperature;
 	}
 
+- Should we support point and directional light estimates?
+
 ## XRAnchor
 
 	interface XRAnchor {
 		readonly attribute DOMString uid;
 		readonly attribute XRCoordinates coordinates;
 	}
+
+XRAnchors provide per-frame coordinates which the Reality attempts to pin "in place". In a virtual Reality these coordinates do not change. In a Reality based on environment mapping sensors, the anchors may change coordinates on a per-frame bases as the system refines its map.
 
 ## XRPlaneAnchor
 
@@ -166,15 +165,28 @@ A script can request an virtual Reality from the session in order to create a fu
 		readonly attribute double length;
 	}
 
+XRPlaneAnchors usually represent surfaces like floors, table tops, or walls.
+
+## XRAnchorOffset 
+
+	interface XRAnchorOffset {
+		readonly attribute XRAnchor anchor;
+		readonly attribute double x;
+		readonly attribute double y;
+		readonly attribute double z;
+	}
+
+XRAnchorOffset represents a position in relation to an anchor, returned when XRPresentationFrame.findAnchor casts a ray. If the ray intersects an XRPlaneAnchor, the XRAnchorOffset returned will contain that anchor and the position in the anchor's coordinate system where the intersection occurred. If the ray passes near an existing XRAnchor, the XRAnchorOffset returned may contain that anchor and the relative position of closest point on the ray. The Reality may, if possible, create a new XRAnchor for use in the XRAnchorOffset or return null if the ray does not intersect anything in the reality or it is not possible to anchor at the intersection.
+
+- How near is "near" for rays passing XRAnchors? ARKit suggests to stay no more than 3M from anchors or suffer lever arm issues.
+
 ## XRManifold
 
 	interface XRManifold {
 		TBD
 	}
 
-### Todo
-
-- expose the manifold vertices and edges as well as its extent (FOV only, full sphere, etc)
+- How do we expose the manifold vertices and edges as well as its extent (FOV only, full sphere, etc)?
 
 ## XRStageBounds
 
@@ -204,10 +216,11 @@ A script can request an virtual Reality from the session in order to create a fu
 		readonly attribute boolean hasLightEstimate;
 		readonly attribute XRLightEstimate? lightEstimate;
 
+		readonly attribute sequence<XRAnchor> anchors;
 		long addAnchor(XRAnchor anchor);
 		void removeAnchor(DOMString uid);
 		XRAnchor? getAnchor(DOMString uid);
-		<sequence <XRAnchor>> getAnchors();
+		XRAnchorOffset? findAnchor(XRCoordinates); // cast a ray to find or create an anchor at the first intersection in the Reality
 
 		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type, ...); // Tries the types in order, returning the first match or null if none is found
 
@@ -216,10 +229,8 @@ A script can request an virtual Reality from the session in order to create a fu
 
 _The XRPresentationFrame differs from the VRPresentationFrame with the addition of the point cloud, manifold, light estimates, and anchor management._
 
-### Todo
-
-- notice when a marker or feature based anchor (e.g. a wall, a table top) are detected
-- access camera image buffer aor texture
+- Should we fire an event when a marker or feature based anchor (e.g. a wall, a table top) is detected?
+- How can we access camera image buffers aor textures?
 
 ## XRView
 
@@ -256,9 +267,7 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 
 The XRCartographicCoordinates are used in conjunction with the XRCoordinateSystem to represent a frame of reference that may optionally be positioned in relation to a geodetic frame like WGS84 for Earth, otherwise a sphere is assumed.
 
-### TODO
-
-- find geodetic frames for other planets and moons in this solar system
+- We could find geodetic frames for other planets and moons in this solar system
 
 ## XRCoordinateSystem
 
