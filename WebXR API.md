@@ -68,20 +68,21 @@ A Hololens could expose a single passthrough display.
 		readonly attribute XRDisplay display;
 		readonly attribute XRSessionCreateParameters createParameters;
 
+		readonly attribute <sequence <Reality>> realities; // All realities available to this session
+		readonly attribute Reality reality; // Defaults to most recently used Reality
+
+		attribute XRLayer layer;
 		attribute double depthNear;
 		attribute double depthFar;
 
-		attribute XRLayer layer;
-		attribute Reality reality; // Defaults to most recently used Reality
 
 		Reality createVirtualReality(DOMString name, boolean shared=false);
-		sequence <Reality> getRealities();
 		Promise<void> requestRealityChange(Reality reality);
 
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
-		Promise<void> endSession();
+		Promise<void> end();
 
 		attribute EventHandler onblur;
 		attribute EventHandler onfocus;
@@ -271,7 +272,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 ## XRCoordinates
 
 	interface XRCoordinates {
-		attribute XRCoordinateSystem coordinateSystem;
+		readonly attribute XRCoordinateSystem coordinateSystem;
 		readonly attribute Float32Array poseMatrix;
 
 		XRCoordinates? getTransformedCoordinates(XRCoordinateSystem otherCoordinateSystem, XRCoordinates resultXRCoordinates=null) 
@@ -285,6 +286,8 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 
 		Float32Array getViewMatrix(XRView view);
 	};
+
+- Do we need coordinate systems for the poseModelMatrix and getViewMatrix?
 
 ## XRLayer
 
