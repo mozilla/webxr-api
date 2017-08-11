@@ -277,7 +277,7 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 		readonly attribute XRCoordinateSystem coordinateSystem;
 		readonly attribute Float32Array poseMatrix;
 
-		XRCoordinates? getTransformedCoordinates(XRCoordinateSystem otherCoordinateSystem, XRCoordinates resultXRCoordinates=null) 
+		XRCoordinates? getTransformedCoordinates(XRCoordinateSystem otherCoordinateSystem) 
 	};
 
 
@@ -304,10 +304,6 @@ The XRCartographicCoordinates are used in conjunction with the XRCoordinateSyste
 	};
 
 The focus and blur events on XRLayer are separate from the session events with the same names. While the session focus and blur are fired when the entire display is active or inactive, the layer focus and blur fire when an individual layer becomes the one and only active layer. The UA selects a single layer at a time to receive focus for input events, usually based on a layer selection action taken by the user.
-
-### Todo
-
-- misbehavior: visual, CPU, GPU, network
 
 ## XRWebGLLayer
 
