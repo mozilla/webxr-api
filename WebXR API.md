@@ -218,6 +218,7 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 
 ### Todo
 
+- notice when a marker or feature based anchor (e.g. a wall, a table top) are detected
 - access camera image buffer aor texture
 
 ## XRView
