@@ -1,0 +1,7 @@
+Liz steps quietly out of her bedroom so that her partner can sleep in after a long night. She puts on her glasses as she walks downstairs and her flock comes alive. She shoos her music and sculpture apps aside and pushes the web browser app to the front as she tells it to open the BBC news page. She pokes the page to play the World News podcast while she starts the coffee, but it's too intense for morning time so she tosses it away. As she starts the 4 minute timer, she notices that one of the search augs that she left in the kitchen has located a new vegetarian burrito stand a few blocks away. she tuts its map pin over to mid-day on her calendar and walks downstairs to the garden.
+
+The plant babies need some water, and her music app picks up a sound stickie that the kid left on the watering can. It begins to play one of their compositions, which lasts about as long as it takes her to water everyone. She pulls up her keyboard and pokes out a proud parent emoji next to the watering can for the kid to find.
+
+Liz left a lot of augs running in the downstairs lounge last night when she was poking at a new project, so she tuts most of them away. It's still too early and she hasn't had coffee. The one aug that she leaves up is a sketch of a character arc for a re-imagining of an Appalachian folk hero that she intends to sell into the Korean film market. She stares at it for a few minutes, and just as she flops onto one of the big pillows, the coffee timer goes off.
+
+She sighs and heads upstairs to bring a cup of the sweet nectar of life to her partner.

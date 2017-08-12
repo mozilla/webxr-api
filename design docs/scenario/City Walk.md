@@ -1,0 +1,7 @@
+The doctor says that if Jan wants to avoid sciatica pain in the future she'll need sit as little as possible and to walk at least 45 minutes every day. So, each day at lunch she dutifully steps back from her standing desk, puts on her jacket and glasses, takes the elevator down from her office, and walks out into downtown Seattle.
+
+Jan usually doesn't keep a lot of augs or apps running, but she's started to leave the Architectural Digest aug running so that it points out interesting bits of the Seattle skyline while she walks.
+
+Half-way through her route she wants a bit of music, so she tells her assistant to play one of the road trip streams offered by Spotify. The Spotify control app appears in her flock and follows her as she walks. When she pauses to wait for a crossing signal, her flock catches up and flows around her into easy-to-reach positions that won't distract her too much.
+
+On occasion one of the songs will annoy her, and she'll poke the Spotify app's skip control. When a great song comes on, she'll grab the app and tap it against her favorite songs list that she keeps in a note that is stuck to her forearm. The title and artist with a link appear at the bottom of the list.
