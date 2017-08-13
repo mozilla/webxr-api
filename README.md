@@ -1,9 +1,9 @@
-# webar-api
-A proposal and starting point for discussing a WebAR extension to WebVR.
+# webxr-api
+A proposal and starting point for discussing WebXR, an expansion of WebVR to include AR/MR capabilities.
 
-In order to make progress on defining a WebAR extension to WebVR, we are creating a proposal for this capability.  The api is intended to extend either the native WebVR implementation, or the WebVR polyfill, with AR capabilities appropriate for the underlying platform.
+In order to make progress on defining WebXR, we are creating a proposal for this capability.  The api is intended to build on the concepts already included in the native WebVR implementation, or the WebVR polyfill, but extend them with AR capabilities appropriate for the underlying platform.
 
-Some of the concepts we believe are important to have in WebAR include 
+Some of the concepts we believe are important to have in WebXR include 
 
 - the ability to have reality renderer _inside_ the browser, as this is essential for enabling user privacy, easy cross platform application, and performance 
 
