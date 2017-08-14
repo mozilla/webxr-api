@@ -3,6 +3,8 @@ A proposal and starting point for discussing WebXR, an expansion of WebVR to inc
 
 In order to make progress on defining WebXR, we are creating a proposal for this capability.  The api is intended to build on the concepts already included in the native WebVR implementation, or the WebVR polyfill, but extend them with AR capabilities appropriate for the underlying platform.
 
+The initial interface draft is in [WebXR API.md](WebXR API.md).
+
 Some of the concepts we believe are important to have in WebXR include:
 
 - the ability to have reality renderer _inside_ the browser, as this is essential for enabling user privacy, easy cross platform application, and performance.
