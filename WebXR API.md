@@ -6,7 +6,7 @@ The major concepts are:
 
 *XRDisplay*: a particular device and method for rendering XR layers (e.g. Daydream, Vive, Rift, Hololens, GearVR, Cardboard, or magic window)
 
-*Reality*: the rearmost layer shown in a display (e.g. the real world in a passthrough display, a virtual reality in a HMD, a camera view in a magic window)
+*Reality*: the rearmost layer shown in a display (e.g. the real world in a passthrough display, a virtual reality in a HMD, a camera view in a magic window). It is the view of the world presented to the user that will be augmented.
 
 *XRSession*: an interface to a display for rendering onto a single layer and requesting changes to the current Reality
 
