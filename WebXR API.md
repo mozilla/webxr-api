@@ -102,12 +102,16 @@ There is a second type of focus and blur on the XRLayer. See below.
 
 _The XRSession plays the same basic role as the VRSession, with the addition of Reality management. The `baseLayer` attribute has been renamed to `layer` because the Reality will now be the rearmost "base" layer with the XRLayer of each session composited on top._
 
+	enum XRSessionRealityType { "virtual", "augmented", "any" };
+
 	dictionary XRSessionCreateParametersInit {
 		required boolean exclusive = true;
+		optional XRSessionRealityType type = "virtual";
 	};
 
 	interface VRSessionCreateParameters {
 		readonly attribute boolean exclusive;
+		readonly attribute XRSessionRealityType type;
 	};
 
 - 'exclusive' needs to be rethought given the new use of XRDisplay for magic window. Do we still need sessions that just wants sensor data? 

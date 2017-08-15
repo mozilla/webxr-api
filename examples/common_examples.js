@@ -9,7 +9,7 @@
 		createVirtualReality: if true, create a new empty reality for this app
 */
 class XRExampleBase {
-	constructor(domElement, frameOfReferenceTypes, createVirtualReality=false){
+	constructor(domElement, frameOfReferenceTypes, createVirtualReality=true){
 		this.el = domElement
 		this.frameOfReferenceTypes = frameOfReferenceTypes
 		this.createVirtualReality = createVirtualReality
@@ -44,7 +44,7 @@ class XRExampleBase {
 			}
 			this.display = displays[0] // production code would allow the user to choose			
 
-			this.display.requestSession({ exclusive: false }).then(session => {
+			this.display.requestSession({ exclusive: this.createVirtualReality }).then(session => {
 				this.handleNewSession(session)
 			}).catch(err => {
 				console.error(err)

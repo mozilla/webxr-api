@@ -1,7 +1,7 @@
 
 class VRSetupExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['geospatial', 'stage', 'eyeLevel'], true)
+		super(domElement, ['stage', 'eyeLevel'], true)
 	}
 
 
