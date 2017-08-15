@@ -1,6 +1,6 @@
 # WebVR 2.0 changes to allow XR
 
-This document represents the WebXR interfaces after using the "WebVR 2.0 changes to *allow* AR" list in [design docs/From WebVR 2.0 to WebXR 2.1.md]() to make the changes that will make it possible to eventually support AR. See the "WebVR 2.0 changes to *support* AR" list and the full [WebXR API.md]() for API changes that would be required to actually implement AR applications.
+This document represents the WebXR interfaces after using the "WebVR 2.0 changes to *allow* AR" list in [From WebVR 2.0 to WebXR 2.1.md](https://github.com/mozilla/webxr-api/blob/master/design%20docs/From%20WebVR%202.0%20to%20WebXR%202.1.md) to make the changes that will make it possible to eventually support AR. See the "WebVR 2.0 changes to *support* AR" list and the full [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md) for API changes that would be required to actually implement AR applications.
 
 The major changes from WebVR "2.0" are:
 
