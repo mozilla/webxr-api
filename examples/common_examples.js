@@ -44,10 +44,13 @@ class XRExampleBase {
 			}
 			this.display = displays[0] // production code would allow the user to choose			
 
-			this.display.requestSession({ exclusive: this.createVirtualReality }).then(session => {
+			this.display.requestSession({
+				exclusive: this.createVirtualReality,
+				type: this.createVirtualReality ? XRSession.REALITY : XRSession.AUGMENTATION
+			}).then(session => {
 				this.handleNewSession(session)
 			}).catch(err => {
-				console.error(err)
+				console.error('Error requesting session', err)
 				this.showMessage('Could not initiate the session')
 			})
 		})
@@ -105,14 +108,14 @@ class XRExampleBase {
 		this.session.addEventListener('blur', ev => { this.handleSessionBlur(ev) })
 		this.session.addEventListener('end', ev => { this.handleSessionEnded(ev) })
 
+		// Create a canvas and context for the layer
+		let glCanvas = document.createElement('canvas')
+		let glContext = glCanvas.getContext('webgl')
+		this.session.layer = new XRWebGLLayer(this.session, glContext)
+
 		// Handle layer focus events
 		this.session.layer.addEventListener('focus', ev => { this.handleLayerFocus(ev) })
 		this.session.layer.addEventListener('blur', ev => { this.handleLayerBlur(ev) })
-
-		// Create a canvas and context for the layer
-		let glCanvas = document.createElement('canvas')
-		let glContext = glCanvas.getContext('webgl', { compatibleXRDisplay: this.display })
-		this.session.layer = new XRWebGLLayer(this.session, glContext)
 
 		// Set up the THREE renderer with the session's layer's glContext
 		this.renderer = new THREE.WebGLRenderer({
@@ -167,8 +170,7 @@ class XRExampleBase {
 
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
-
-		let coordinateSystem = this.frame.getCoordinateSystem(...this.frameOfReferenceTypes)
+		let coordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
 		if(coordinateSystem === null){
 			this.showMessage('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
@@ -176,18 +178,12 @@ class XRExampleBase {
 			// Production apps could render a 'waiting' message and keep checking for an acceptable coordinate system
 			return
 		}
-
 		let pose = frame.getViewPose(coordinateSystem)
-
 		if(this.realityLayer){
 			this.updateRealityScene(frame, coordinateSystem, pose)
 		}
 
 		this.updateScene(frame, coordinateSystem, pose)
-
-		if(this.realityLayer){
-			// Todo render into the Reality layer the way we render into the session layer in the code below
-		}
 
 		this.renderer.autoClear = false
 		this.scene.matrixAutoUpdate = false
@@ -195,13 +191,14 @@ class XRExampleBase {
 		this.renderer.setSize(this.session.layer.frameBufferWidth, this.session.layer.frameBufferWidth)
 		this.renderer.clear()
 
-		this.session.layer.context.bindFramebuffer(this.session.layer.framebuffer)
+		this.session.layer.context.bindFramebuffer(this.session.layer.context.FRAMEBUFFER, this.session.layer.framebuffer)
 
 		// Render each view into this.session.layer.context
 		for(const view of frame.views){
 			const viewport = view.getViewport(this.session.layer)
 			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)
+			// THIS IS WHERE WE HIT UNIMPLEMENTED CODE
 			this.scene.matrix.fromArray(pose.getViewMatrix(view))
 			this.scene.updateMatrixWorld(true)
 			this.renderer.render(this.scene, this.camera)

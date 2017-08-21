@@ -1,13 +1,12 @@
-export default class XRCoordinateSystem {	
-	get cartographicCoordinates(){
-		//readonly attribute XRCartographicCoordinates? cartographicCoordinates;
-		throw 'Not implemented'
+export default class XRCoordinateSystem {
+	constructor(type, cartographicCoordinates=null){
+		this._type = type
+		this._cartographicCoordinates = cartographicCoordinates
 	}
 
-	get type(){
-		// readonly attribute XRFrameOfReferenceType type;
-		throw 'Not implemented'
-	}
+	get cartographicCoordinates(){ return this._cartographicCoordinates }
+
+	get type(){ return this._type }
 	
 	getTransformTo(otherCoordinateSystem){
 		//Float32Array? getTransformTo(XRCoordinateSystem other);

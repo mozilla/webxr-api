@@ -19,11 +19,15 @@ import XRViewPose from './XRViewPose.js'
 import XRLayer from './XRLayer.js'
 import XRWebGLLayer from './XRWebGLLayer.js'
 
+import EventHandlerBase from './fill/EventHandlerBase.js'
+import MagicWindowDisplay from './fill/MagicWindowDisplay.js'
+
 /*
 XRPolyfill implements the window.XR functionality as a polyfill
 */
-class XRPolyfill {
+class XRPolyfill extends EventHandlerBase {
 	constructor(){
+		super()
 		window.XRDisplay = XRDisplay
 		window.XRSession = XRSession
 		window.XRSessionCreateParameters = XRSessionCreateParameters
@@ -44,11 +48,14 @@ class XRPolyfill {
 		window.XRViewPose = XRViewPose
 		window.XRLayer = XRLayer
 		window.XRWebGLLayer = XRWebGLLayer
+
+		this.displays = [new MagicWindowDisplay()]
 	}
 
 	getDisplays(){
-		// returns 		Promise<sequence<XRDisplay>>
-		throw 'Not implemented'
+		return new Promise((resolve, reject) => {
+			resolve(this.displays)
+		})
 	}
 
 	//attribute EventHandler ondisplayconnect;
@@ -56,4 +63,4 @@ class XRPolyfill {
 }
 
 /* Install XRPolyfill if window.XR does not exist */
-if(typeof window.XR === 'undefined') window.XR = new XRPolyfill()
+if(typeof navigator.XR === 'undefined') navigator.XR = new XRPolyfill()

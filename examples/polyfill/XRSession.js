@@ -1,65 +1,85 @@
+import EventHandlerBase from './fill/EventHandlerBase.js'
+
 /*
 A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as make a request for an animation frame.
 */
-export default class XRSession {
-	get display(){
-		//readonly attribute XRDisplay display
-		throw 'Not implemented'
+export default class XRSession extends EventHandlerBase {
+	constructor(display, parameters, realities, reality){
+		super()
+		this._display = display
+		this._parameters = parameters
+		this._reality = reality
+		this._realities = realities
+		this._anchors = []
+
+		this._baseLayer = null
+		this._depthFar = 1
+		this._depthFar = 1000
+		this._stageBounds = null
 	}
 
-	get type(){
-		// readonly attribute XRSessionRealityType type
-		throw 'Not implemented'
-	}
+	get display(){ return this._display }
 
-	get createParameters(){
-		//readonly attribute XRSessionCreateParameters createParameters;
-		throw 'Not implemented'
-	}
+	get createParameters(){ return this._parameters }
 
-	get realities(){
-		//readonly attribute <sequence <Reality>> realities; // All realities available to this session
-		throw 'Not implemented'
-	}
+	get realities(){ return this._realities }
 
-	get reality(){
-		//readonly attribute Reality reality; // Defaults to most recently used Reality
-		throw 'Not implemented'
-	}
+	get reality(){ return this._reality }
 
-	get baseLayer(){
-		//attribute XRLayer layer;
-		throw 'Not implemented'
-	}
+	get baseLayer(){ return this._baseLayer }
+	set baseLayer(value){ this._baseLayer = value }
 
-	get depthNear(){
-		//attribute double depthNear;
-		throw 'Not implemented'
-	}
+	get depthNear(){ this._depthNear }
+	set depthNear(value){ this._depthNear = value }
 
-	get depthFar(){
-		//attribute double depthFar;
-		throw 'Not implemented'
-	}
+	get depthFar(){ this._depthFar }
+	set depthFar(value){ this._depthFar = value }
 
-	get hasStageBounds(){
-		//readonly attribute boolean hasStageBounds;
-		throw 'Not implemented'
-	}
+	get hasStageBounds(){ this._stageBounds !== null }
 
-	get stageBounds(){
-		//readonly attribute XRStageBounds? stageBounds;
-		throw 'Not implemented'
-	}
+	get stageBounds(){ return this._stageBounds }
 
 	requestRealityChange(reality){
-		// returns Promise<void>
-		throw 'Not implemented'
+		return new Promise((resolve, reject) => {
+			if(reality instanceof Reality === false){
+				reject()
+				return
+			}
+			this._reality = reality
+			resolve()
+		})
 	}
 
 	requestFrame(callback){
-		// returns long
-		throw 'Not implemented'
+		if(typeof callback !== 'function'){
+			throw 'Invalid callback'
+		}
+		requestAnimationFrame(() => {
+			callback(this._createPresentationFrame())
+		})
+		return 1
+	}
+
+	_createPresentationFrame(){
+		return new XRPresentationFrame(this)
+	}
+
+	_getCoordinateSystem(...types){
+		for(let type of types){
+			switch(type){
+				case XRCoordinateSystem.HEAD_MODEL:
+					return this._display._headModelCoordinateSystem
+				case XRCoordinateSystem.EYE_LEVEL:
+					return this._display._eyeLevelCoordinateSystem
+				case XRCoordinateSystem.STAGE:
+					return this._display._stageCoordinateSystem
+				case XRCoordinateSystem.GEOSPATIAL:
+					// Not supported yet
+				default:
+					continue
+			}
+		}
+		return null
 	}
 
 	cancelFrame(handle){

@@ -1,14 +1,24 @@
+import XRViewport from './XRViewport.js'
+
 export default class XRView {
-	get eye(){
-		// readonly attribute XREye eye;
-		throw 'Not implemented'
+	constructor(x, y, width, height, eye=null){
+		this._eye = eye
+		this._viewport = new XRViewport(x, y, width, height)
+
+		this._projectionMatrix = [
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		]
 	}
 
-	get projectionMatrix(){
-		// readonly attribute Float32Array projectionMatrix;
-	}
+	get eye(){ return this._eye }
 
-	getViewport(layer){
-		// XRViewport? getViewport(XRLayer layer);
-	}
+	get projectionMatrix(){ return this._projectionMatrix }
+
+	getViewport(layer){ return this._viewport }
 }
+
+XRView.LEFT = 'left'
+XRView.RIGHT = 'right'

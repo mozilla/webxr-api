@@ -98,16 +98,16 @@ A script that wishes to make use of an XRDisplay can request an XRSession. This 
 
 _The XRSession plays the same basic role as the VRSession, with the addition of Reality management._
 
-	enum XRSessionRealityType { "reality", "augmentation" };
+	enum XRSessionType { "reality", "augmentation" };
 
 	dictionary XRSessionCreateParametersInit {
 		required boolean exclusive = true;
-		optional XRSessionRealityType type = "reality";
+		optional XRSessionType type = "reality";
 	};
 
 	interface XRSessionCreateParameters {
 		readonly attribute boolean exclusive;
-		readonly attribute XRSessionRealityType type;
+		readonly attribute XRSessionType type;
 	};
 
 - 'exclusive' needs to be rethought given the new use of XRDisplay for magic window. Do we still need sessions that just wants sensor data? 

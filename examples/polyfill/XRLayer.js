@@ -1,20 +1,5 @@
-export default class XRLayer {
-	get hasFocus(){
-		// readonly attribute boolean hasFocus;
-		throw 'Not implemented'
- 	}
-	
-	requestFocus(){
-		// Promise<void> requestFocus();
-		throw 'Not implemented'
-	}
-		
+import EventHandlerBase from './fill/EventHandlerBase.js'
 
-	requestBlur(){
-		// Promise<void> requestBlur();
-		throw 'Not implemented'
-	}
-
-	// attribute EventHandler onfocus;
-	// attribute EventHandler onblur;
+export default class XRLayer extends EventHandlerBase {
+	// Everything is implemented on XRWebGLLayer
 }

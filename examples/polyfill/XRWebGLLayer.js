@@ -1,10 +1,14 @@
 import XRLayer from './XRLayer.js'
 
 export default class XRWebGLLayer extends XRLayer {
-	get context(){
-		// readonly attribute XRWebGLRenderingContext context;
-		throw 'Not implemented'
+	constructor(session, context){
+		super()
+		this._session = session
+		this._context = context
+		this._framebuffer = null // TODO
 	}
+
+	get context(){ return this._context }
 
 	get antialias(){
 		// readonly attribute boolean antialias;
@@ -31,19 +35,16 @@ export default class XRWebGLLayer extends XRLayer {
 		throw 'Not implemented'
 	}
 	
-	get frameBuffer(){
-		// readonly attribute WebGLFramebuffer framebuffer;
-		throw 'Not implemented'
+	get framebuffer(){
+		return this._framebuffer
 	}
 
-	get frameBufferWidth(){
-		// readonly attribute long framebufferWidth;
-		throw 'Not implemented'
+	get framebufferWidth(){
+		return this._context.drawingBufferWidth
 	}
 
-	get frameBufferHeight(){
-		// readonly attribute long framebufferHeight;
-		throw 'Not implemented'
+	get framebufferHeight(){
+		return this._context.drawingBufferHeight
 	}
 
 	requestViewportScaling(viewportScaleFactor){

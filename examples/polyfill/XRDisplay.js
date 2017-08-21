@@ -1,8 +1,23 @@
+import EventHandlerBase from './fill/EventHandlerBase.js'
 
 /*
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
 */
-export default class XRDisplay {
+export default class XRDisplay extends EventHandlerBase {
+	constructor(){
+		super()
+		// This doesn't yet support geospatial
+
+		this._headModelCoordinateSystem = new XRCoordinateSystem(XRCoordinateSystem.HEAD_MODEL)
+		this._eyeLevelCoordinateSystem = new XRCoordinateSystem(XRCoordinateSystem.EYE_LEVEL)
+		this._stageCoordinateSystem = new XRCoordinateSystem(XRCoordinateSystem.STAGE)
+
+		this._headPose = new XRViewPose()
+		this._eyeLevelPose = new XRViewPose()
+		this._stagePose = new XRViewPose()
+
+		this._views = []
+	}
 
 	get displayName(){
 		//readonly attribute DOMString displayName
@@ -17,13 +32,27 @@ export default class XRDisplay {
 	supportsSession(parameters){
 		// parameters: XRSessionCreateParametersInit 
 		// returns Promise<boolean>
-		throw 'Not implemented'
+		return new Promise((resolve, reject) => {
+			resolve(this._supportedCreationParameters(parameters))
+		})
 	}
 
 	requestSession(parameters){
-		// parameters: XRSessionCreateParametersInit 
-		// returns Promise<XRSession>
-		throw 'Not implemented'
+		return new Promise((resolve, reject) => {
+			if(this._supportedCreationParameters(parameters) === false){
+				reject()
+				return
+			}
+			resolve(this._getSession(parameters))
+		})
+	}
+
+	_getSession(parameters){
+		return 'Not implemented'
+	}
+
+	_supportedCreationParameters(parameters){
+		return 'Not implemented'
 	}
 
 	//attribute EventHandler ondeactivate;

@@ -1,20 +1,16 @@
 export default class XRViewport {
-	get x(){
-		// readonly attribute long x;
-		throw 'Not implemented'
+	constructor(x, y, width, height){
+		this._x = x
+		this._y = y
+		this._width = width
+		this._height = height
 	}
 
-	get y(){
-		// readonly attribute long y;
-		throw 'Not implemented'
-	}
-	get width(){
-		// readonly attribute long width;
-		throw 'Not implemented'
-	}
-	
-	get height(){
-		// readonly attribute long height;
-		throw 'Not implemented'
-	}
+	get x(){ return this._x }
+
+	get y(){ return this._y }
+
+	get width(){ return this._width }
+
+	get height(){ return this._height }
 }
