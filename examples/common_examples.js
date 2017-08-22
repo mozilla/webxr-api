@@ -18,12 +18,6 @@ class XRExampleBase {
 		this.display = null
 		this.session = null
 
-		// Set only if createVirtualReality is true
-		this.realityLayer = null
-		this.realityScene = null
-		this.realityCamera = null
-		this.realityRenderer = null
-
 		// Create a simple THREE test scene for the layer
 		this.scene = new THREE.Scene()
 		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000)
@@ -42,7 +36,7 @@ class XRExampleBase {
 				this.showMessage('No displays are available')
 				return
 			}
-			this.display = displays[0] // production code would allow the user to choose			
+			this.display = displays[0] // production code would allow the user to choose, this code assumes that this is a MagicWindowDisplay
 
 			this.display.requestSession({
 				exclusive: this.createVirtualReality,
@@ -111,6 +105,7 @@ class XRExampleBase {
 		// Create a canvas and context for the layer
 		let glCanvas = document.createElement('canvas')
 		let glContext = glCanvas.getContext('webgl')
+
 		this.session.layer = new XRWebGLLayer(this.session, glContext)
 
 		// Handle layer focus events
@@ -122,32 +117,32 @@ class XRExampleBase {
 			canvas: glCanvas,
 			context: glContext
 		})
-		this.renderer.setPixelRatio(1) // What should this be?
+		this.renderer.setPixelRatio(1)
+
+		/*
+		This part is a bit bogus and relies on the polyfill only returning a full screen MagicWindowDisplay
+		*/
+		const width = parseInt(window.getComputedStyle(document.body).width)
+		const height = parseInt(window.getComputedStyle(document.body).height)
+		this.camera.aspect = width / height
+		this.camera.updateProjectionMatrix()
+		this.renderer.setSize(width, height)
+		document.body.innerHTML = ''
+		document.body.appendChild(this.renderer.domElement)
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
 
 			// Reqest the Reality change and then set up its XRLayer
 			this.session.requestRealityChange(reality).then(() => {
-				// Create a canvas and context for the Reality's layer
-				let realityCanvas = document.createElement('canvas')
-				let realityContext = realityCanvas.getContext('webgl', { compatibleXRDisplay: this.display })
-				this.realityLayer = new XRWebGLLayer(this.session, realityContext)
-
-				// Attempt to set the Reality's layer, which should succeed since this script created it
-				reality.setLayer(this.realityLayer).then(() => {
-					this.session.requestFrame(frame => { this.handleFrame(frame) })
-				}).catch(err => {
-					console.error('Error requesting the Reality layer', err)
-					this.session.endSession()
-					return
-				})
+				this.session.requestFrame(frame => { this.handleFrame(frame) })
+			}).error(err => {
+				console.error('Could not change realities')
 			})
 		} else {
 			// The session's reality defaults to the most recently used shared reality
 			this.session.requestFrame(frame => { this.handleFrame(frame) })
 		}
-
 	}
 
 	// Extending classes can react to these events
@@ -163,10 +158,9 @@ class XRExampleBase {
 	initializeScene(){}
 
 	/*
-		Extending classes that need to update the layer or reality scenes during each frame should override these methods
+		Extending classes that need to update the layer during each frame should override these methods
 	*/
 	updateScene(frame, coordinateSystem, pose){}
-	updateRealityScene(frame, coordinateSystem, pose){}
 
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
@@ -179,26 +173,20 @@ class XRExampleBase {
 			return
 		}
 		let pose = frame.getViewPose(coordinateSystem)
-		if(this.realityLayer){
-			this.updateRealityScene(frame, coordinateSystem, pose)
-		}
-
 		this.updateScene(frame, coordinateSystem, pose)
 
 		this.renderer.autoClear = false
 		this.scene.matrixAutoUpdate = false
-
-		this.renderer.setSize(this.session.layer.frameBufferWidth, this.session.layer.frameBufferWidth)
+		this.renderer.setSize(this.session.layer.framebufferWidth, this.session.layer.framebufferHeight)
 		this.renderer.clear()
 
-		this.session.layer.context.bindFramebuffer(this.session.layer.context.FRAMEBUFFER, this.session.layer.framebuffer)
+		//this.session.layer.context.bindFramebuffer(this.session.layer.context.FRAMEBUFFER, this.session.layer.framebuffer)
 
 		// Render each view into this.session.layer.context
 		for(const view of frame.views){
 			const viewport = view.getViewport(this.session.layer)
 			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)
-			// THIS IS WHERE WE HIT UNIMPLEMENTED CODE
 			this.scene.matrix.fromArray(pose.getViewMatrix(view))
 			this.scene.updateMatrixWorld(true)
 			this.renderer.render(this.scene, this.camera)

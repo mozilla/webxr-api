@@ -1,10 +1,12 @@
 import XRDisplay from '../XRDisplay.js'
+import XRFieldOfView from '../XRFieldOfView.js'
 import MagicWindowSession from './MagicWindowSession.js'
+import MatrixMath from './MatrixMath.js'
 
 export default class MagicWindowDisplay extends XRDisplay {
 	constructor(){
 		super()
-		this._views.push(new XRView(0, 0, 1024, 1024))
+		this._views.push(new XRView(this._fov, this._depthNear, this._depthFar))
 	}
 
 	get displayName(){

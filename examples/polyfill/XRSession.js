@@ -4,17 +4,15 @@ import EventHandlerBase from './fill/EventHandlerBase.js'
 A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as make a request for an animation frame.
 */
 export default class XRSession extends EventHandlerBase {
-	constructor(display, parameters, realities, reality){
+	constructor(display, createParameters, realities, reality){
 		super()
 		this._display = display
-		this._parameters = parameters
+		this._createParameters = createParameters
 		this._reality = reality
 		this._realities = realities
 		this._anchors = []
 
 		this._baseLayer = null
-		this._depthFar = 1
-		this._depthFar = 1000
 		this._stageBounds = null
 	}
 
@@ -29,11 +27,11 @@ export default class XRSession extends EventHandlerBase {
 	get baseLayer(){ return this._baseLayer }
 	set baseLayer(value){ this._baseLayer = value }
 
-	get depthNear(){ this._depthNear }
-	set depthNear(value){ this._depthNear = value }
+	get depthNear(){ this._display._depthNear }
+	set depthNear(value){ this._display._depthNear = value }
 
-	get depthFar(){ this._depthFar }
-	set depthFar(value){ this._depthFar = value }
+	get depthFar(){ this._display._depthFar }
+	set depthFar(value){ this._display._depthFar = value }
 
 	get hasStageBounds(){ this._stageBounds !== null }
 
@@ -54,10 +52,18 @@ export default class XRSession extends EventHandlerBase {
 		if(typeof callback !== 'function'){
 			throw 'Invalid callback'
 		}
-		requestAnimationFrame(() => {
+		return window.requestAnimationFrame(() => {
 			callback(this._createPresentationFrame())
 		})
-		return 1
+	}
+
+	cancelFrame(handle){
+		return cancelAnimationFrame(handle)
+	}
+
+	end(){
+		//returns Promise<void>
+		throw 'Not implemented'
 	}
 
 	_createPresentationFrame(){
@@ -80,15 +86,6 @@ export default class XRSession extends EventHandlerBase {
 			}
 		}
 		return null
-	}
-
-	cancelFrame(handle){
-		throw 'Not implemented'
-	}
-
-	end(){
-		//returns Promise<void>
-		throw 'Not implemented'
 	}
 
 	/*

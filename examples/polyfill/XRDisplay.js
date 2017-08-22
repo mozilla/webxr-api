@@ -1,4 +1,5 @@
 import EventHandlerBase from './fill/EventHandlerBase.js'
+import XRFieldOfView from './XRFieldOfView.js'
 
 /*
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
@@ -15,6 +16,10 @@ export default class XRDisplay extends EventHandlerBase {
 		this._headPose = new XRViewPose()
 		this._eyeLevelPose = new XRViewPose()
 		this._stagePose = new XRViewPose()
+
+		this._fov = new XRFieldOfView(45, 45, 45, 45)
+		this._depthNear = 0.1
+		this._depthFar = 1000
 
 		this._views = []
 	}

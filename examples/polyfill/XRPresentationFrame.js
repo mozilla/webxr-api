@@ -41,7 +41,7 @@ export default class XRPresentationFrame {
 			throw 'Not an XRAnchor'
 		}
 		this._anchors.push(anchor)
-		return this._session._anchors.length
+		return this._session._anchors.length - 1
 	}
 
 	removeAnchor(uid){

@@ -28,7 +28,7 @@ class ARAnchorExample extends XRExampleBase {
 
 	// Called during construction
 	initializeScene(){
-		fillInBoxScene(this.scene)		
+		fillInBoxScene(this.scene)
 	}
 
 	/*

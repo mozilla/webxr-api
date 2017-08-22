@@ -1,24 +1,42 @@
 import XRViewport from './XRViewport.js'
+import MatrixMath from './fill/MatrixMath.js'
 
 export default class XRView {
-	constructor(x, y, width, height, eye=null){
+	constructor(fov, depthNear, depthFar, eye=null){
+		this._fov = fov
+		this._depthNear = depthNear
+		this._depthFar = depthFar
 		this._eye = eye
-		this._viewport = new XRViewport(x, y, width, height)
-
-		this._projectionMatrix = [
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0
-		]
+		this._viewport = new XRViewport(0, 0, 1, 1)
+		this._projectionMatrix = new Float32Array(16)
+		MatrixMath.mat4_perspectiveFromFieldOfView(this._projectionMatrix, this._fov, this._depthNear, this._depthFar)
 	}
 
 	get eye(){ return this._eye }
 
 	get projectionMatrix(){ return this._projectionMatrix }
 
-	getViewport(layer){ return this._viewport }
+	getViewport(layer){
+		if(this._eye === XRView.LEFT){
+			this._viewport.x = 0
+			this._viewport.y = 0
+			this._viewport.width = layer.framebufferWidth / 2
+			this._viewport.height = layer.framebufferHeight / 2
+		} else if(this._eye === XRView.RIGHT){
+			this._viewport.x = layer.framebufferWidth / 2
+			this._viewport.y = layer.framebufferWidth / 2
+			this._viewport.width = layer.framebufferWidth / 2
+			this._viewport.height = layer.framebufferHeight / 2
+		} else {
+			this._viewport.x = 0
+			this._viewport.y = 0
+			this._viewport.width = layer.framebufferWidth
+			this._viewport.height = layer.framebufferHeight
+		}
+		return this._viewport
+	}
 }
 
 XRView.LEFT = 'left'
 XRView.RIGHT = 'right'
+XRView.EYES = [XRView.LEFT, XRView.RIGHT]
