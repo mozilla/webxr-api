@@ -1,16 +1,12 @@
 import MatrixMath from './fill/MatrixMath.js'
 
 export default class XRViewPose {
-	constructor(){
-		this._poseModelMatrix = new Float32Array([
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-		])
+	constructor(position=[0, 0, 0], orientation=[0, 0, 0, 1]){
+		this._poseModelMatrix = new Float32Array(16)
+		MatrixMath.mat4_fromRotationTranslation(this._poseModelMatrix, orientation, position)
 	}
 
-	get poseModelMatrix(){ this._poseModelMatrix }
+	get poseModelMatrix(){ return this._poseModelMatrix }
 
 	getViewMatrix(view, out=null){
 		if(out === null){

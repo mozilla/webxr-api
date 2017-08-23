@@ -9,12 +9,12 @@ export default class XRDisplay extends EventHandlerBase {
 		super()
 		// This doesn't yet support geospatial
 
-		this._headModelCoordinateSystem = new XRCoordinateSystem(XRCoordinateSystem.HEAD_MODEL)
-		this._eyeLevelCoordinateSystem = new XRCoordinateSystem(XRCoordinateSystem.EYE_LEVEL)
-		this._stageCoordinateSystem = new XRCoordinateSystem(XRCoordinateSystem.STAGE)
+		this._headModelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.HEAD_MODEL)
+		this._eyeLevelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.EYE_LEVEL)
+		this._stageCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.STAGE)
 
-		this._headPose = new XRViewPose()
-		this._eyeLevelPose = new XRViewPose()
+		this._headPose = new XRViewPose([0, 1.65, 0])
+		this._eyeLevelPose = new XRViewPose([0, 1.65, 0])
 		this._stagePose = new XRViewPose()
 
 		this._fov = new XRFieldOfView(45, 45, 45, 45)
