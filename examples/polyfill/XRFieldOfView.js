@@ -1,4 +1,6 @@
-
+/*
+XRFieldOFView represents the four boundaries of a camera's field of view: up, down, left, and right.
+*/
 export default class XRFieldOfView {
 	constructor(upDegrees, downDegrees, leftDegrees, rightDegrees){
 		this._upDegrees = upDegrees

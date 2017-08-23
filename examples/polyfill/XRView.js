@@ -1,6 +1,10 @@
 import XRViewport from './XRViewport.js'
 import MatrixMath from './fill/MatrixMath.js'
 
+/*
+An XRView describes a single view into an XR scene.
+It provides several values directly, and acts as a key to query view-specific values from other interfaces.
+*/
 export default class XRView {
 	constructor(fov, depthNear, depthFar, eye=null){
 		this._fov = fov

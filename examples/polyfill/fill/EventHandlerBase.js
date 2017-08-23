@@ -1,3 +1,6 @@
+/*
+EventHandlerBase is the base class that implements the EventHandler interface methods for dispatching and receiving events.
+*/
 export default class EventHandlerBase {
 	constructor(){
 		this._listeners = new Map() // string type -> [listener, ...]

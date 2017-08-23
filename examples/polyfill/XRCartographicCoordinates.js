@@ -1,3 +1,6 @@
+/*
+The XRCartographicCoordinates are used in conjunction with the XRCoordinateSystem to represent a frame of reference that may optionally be positioned in relation to a geodetic frame like WGS84 for Earth, otherwise a sphere is assumed.
+*/
 export default class XRCartographicCoordinates {
 	get geodeticFrame(){
 		// attribute XRCartographicCoordinatesGeodeticFrame? geodeticFrame;

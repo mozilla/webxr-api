@@ -1,5 +1,8 @@
 import XRAnchor from './XRAnchor.js'
 
+/*
+XRPresentationFrame provides all of the values needed to render a single frame of an XR scene to the XRDisplay.
+*/
 export default class XRPresentationFrame {
 	constructor(session){
 		this._session = session

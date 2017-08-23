@@ -1,6 +1,9 @@
 import XRCoordinateSystem from './XRCoordinateSystem.js'
 import MatrixMath from './fill/MatrixMath.js'
 
+/*
+XRCoordinates represent a pose (position and orientation) in relation to a XRCoordinateSystem.
+*/
 export default class XRCoordinates {
 	constructor(display, coordinateSystem, position=[0, 0, 0], orientation=[0, 0, 0, 1]){
 		this._display = display

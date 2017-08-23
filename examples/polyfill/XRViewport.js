@@ -1,3 +1,6 @@
+/*
+XRViewport represents the dimensions in pixels of an XRView.
+*/
 export default class XRViewport {
 	constructor(x, y, width, height){
 		this._x = x

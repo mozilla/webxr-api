@@ -1,5 +1,15 @@
 import MatrixMath from './fill/MatrixMath.js'
 
+/*
+XRCoordinateSystem represents the origin of a 3D coordinate system positioned at a known frame of reference.
+The XRCoordinateSystem is a string from XRCoordinateSystem.TYPES:
+
+- XRCoordinateSystem.HEAD_MODEL: origin is aligned with the pose of the head, as sensed by HMD or handset trackers
+- XRCoordinateSystem.EYE_LEVEL: origin is at a fixed distance above the ground
+- XRCoordinateSystem.STAGE: origin is at ground level
+- XRCoordinateSystem.GEOSPATIAL: origin is at the East, Up, South plane tangent to the planet at the latitude, longitude, and altitude represented by the `XRCoordinateSystem.cartographicCoordinates`.
+
+*/
 export default class XRCoordinateSystem {
 	constructor(display, type, cartographicCoordinates=null){
 		this._display = display

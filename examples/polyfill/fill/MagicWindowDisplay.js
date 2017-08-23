@@ -3,6 +3,9 @@ import XRFieldOfView from '../XRFieldOfView.js'
 import MagicWindowSession from './MagicWindowSession.js'
 import MatrixMath from './MatrixMath.js'
 
+/*
+MagicWindowDisplay takes over a handset's full screen and presents a moving view into an XR scene, as if it were a magic window.
+*/
 export default class MagicWindowDisplay extends XRDisplay {
 	constructor(){
 		super()
