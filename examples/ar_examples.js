@@ -3,25 +3,26 @@
 
 class ARSimplestExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['geospatial', 'stage', 'eyeLevel'], false)
+		super(domElement, ['headModel'], false)
 	}
 
 	// Called during construction
 	initializeScene(){
 		fillInBoxScene(this.scene)		
+		this.scene.children[0].rotation.y += 0.5
 	}
 
 	// Called once per frame
 	updateScene(frame, coordinateSystem, pose){
 		// Spin the cube to show this method is called
-		this.scene.children[0].rotation.x += 0.005
-		this.scene.children[0].rotation.y += 0.01
+		//this.scene.children[0].rotation.x += 0.005
+		//this.scene.children[0].rotation.y += 0.01
 	}
 }
 
 class ARAnchorExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['geospatial', 'stage', 'eyeLevel'], false)
+		super(domElement, ['headModel'], false)
 		this.anchorsToAdd = [] // { node, x, y, z }
 		this.anchoredNodes = [] // { anchorUID, node }
 	}

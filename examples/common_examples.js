@@ -29,6 +29,8 @@ class XRExampleBase {
 			return
 		}
 
+
+
 		// Get a display and then request a session
 		navigator.XR.getDisplays().then(displays => {
 			if(displays.length == 0) {
@@ -85,6 +87,7 @@ class XRExampleBase {
 			context: glContext
 		})
 		this.renderer.setPixelRatio(1)
+		this.renderer.setClearColor('#000', 0)
 
 		/*
 		This part is a bit bogus and relies on the polyfill only returning a MagicWindowDisplay
@@ -152,6 +155,7 @@ class XRExampleBase {
 		// Render each view into this.session.layer.context
 		for(const view of frame.views){
 			const viewport = view.getViewport(this.session.layer)
+			//throttledConsoleLog('pose', pose._poseModelMatrix, viewport)
 			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)
 			this.scene.matrix.fromArray(pose.getViewMatrix(view))
@@ -163,12 +167,12 @@ class XRExampleBase {
 
 function fillInBoxScene(scene){
 	let geometry = new THREE.BoxBufferGeometry(1, 1, 1)
-	let material = new THREE.MeshPhongMaterial({ color: '#EFFFAA' })
+	let material = new THREE.MeshPhongMaterial({ color: '#DDDDDD' })
 	let mesh = new THREE.Mesh(geometry, material)
 	mesh.position.set(0, 0, -4)
 	scene.add(mesh)
 
-	let ambientLight = new THREE.AmbientLight('#FFF', 0.4)
+	let ambientLight = new THREE.AmbientLight('#FFF', 1)
 	scene.add(ambientLight)
 
 	let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
@@ -176,3 +180,54 @@ function fillInBoxScene(scene){
 
 	return scene
 }
+
+/*
+Rate limit a function call. Wait is the minimum number of milliseconds between calls.
+If leading is true, the first call to the throttled function is immediately called.
+If trailing is true, once the wait time has passed the function is called. 
+
+This code is cribbed from https://github.com/jashkenas/underscore
+*/
+window.throttle = function(func, wait, leading=true, trailing=true) {
+	var timeout, context, args, result
+	var previous = 0
+
+	var later = function() {
+		previous = leading === false ? 0 : Date.now()
+		timeout = null
+		result = func.apply(context, args)
+		if (!timeout) context = args = null
+	}
+
+	var throttled = function() {
+		var now = Date.now()
+		if (!previous && leading === false) previous = now
+		var remaining = wait - (now - previous)
+		context = this
+		args = arguments
+		if (remaining <= 0 || remaining > wait) {
+		if (timeout) {
+			clearTimeout(timeout)
+			timeout = null
+		}
+		previous = now
+		result = func.apply(context, args)
+		if (!timeout) context = args = null
+		} else if (!timeout && trailing !== false) {
+		timeout = setTimeout(later, remaining)
+		}
+		return result
+	}
+
+	throttled.cancel = function() {
+		clearTimeout(timeout)
+		previous = 0
+		timeout = context = args = null
+	}
+
+	return throttled
+}
+
+window.throttledConsoleLog = throttle((...params) => {
+	console.log(...params)
+}, 1000)

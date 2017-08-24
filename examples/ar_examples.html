@@ -11,12 +11,8 @@
 				height: 100%;
 			}
 			#target {
-				background-color: #EFEFEF;
 				width: 100%;
 				height: 100%;
-			}
-			canvas {
-				background-color: blue;
 			}
 		</style>
 
@@ -30,9 +26,9 @@
 		<div id="target" />
 
 		<script>
-			setTimeout(() => {
+			window.addEventListener('DOMContentLoaded', () => {
 				window.pageApp = new ARSimplestExample(document.getElementById('target'))
-			}, 500)
+			})
 		</script>
 	</body>
 </html>

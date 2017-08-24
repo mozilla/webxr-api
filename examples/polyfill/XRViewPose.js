@@ -12,6 +12,12 @@ export default class XRViewPose {
 
 	get poseModelMatrix(){ return this._poseModelMatrix }
 
+	_setPoseModelMatrix(array16){
+		for(let i=0; i < 16; i++){
+			this._poseModelMatrix[i] = array16[i]
+		}
+	}
+
 	getViewMatrix(view, out=null){
 		if(out === null){
 			out = new Float32Array(16)
