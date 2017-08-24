@@ -1,4 +1,3 @@
-
 /*
 	XRExampleBase holds all of the common XR setup, rendering, and teardown code
 	Extending classes should be able to focus on rendering their scene
@@ -18,12 +17,6 @@ class XRExampleBase {
 		this.display = null
 		this.session = null
 
-		// Set only if createVirtualReality is true
-		this.realityLayer = null
-		this.realityScene = null
-		this.realityCamera = null
-		this.realityRenderer = null
-
 		// Create a simple THREE test scene for the layer
 		this.scene = new THREE.Scene()
 		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000)
@@ -42,12 +35,15 @@ class XRExampleBase {
 				this.showMessage('No displays are available')
 				return
 			}
-			this.display = displays[0] // production code would allow the user to choose			
+			this.display = displays[0] // production code would allow the user to choose, this code assumes that this is a MagicWindowDisplay
 
-			this.display.requestSession({ exclusive: this.createVirtualReality }).then(session => {
+			this.display.requestSession({
+				exclusive: this.createVirtualReality,
+				type: this.createVirtualReality ? XRSession.REALITY : XRSession.AUGMENTATION
+			}).then(session => {
 				this.handleNewSession(session)
 			}).catch(err => {
-				console.error(err)
+				console.error('Error requesting session', err)
 				this.showMessage('Could not initiate the session')
 			})
 		})
@@ -61,38 +57,6 @@ class XRExampleBase {
 		let message = document.createElement('div')
 		message.innerHTML = messageText
 		this.el.append(message)
-		let flatButton = document.createElement('button')
-		flatButton.innerHTML = 'Run flat'
-		this.el.appendChild(flatButton)
-		flatButton.addEventListener('click', ev => {
-			this.testRenderToElement()
-		})
-	}
-
-	/*
-		Render the scene to this.el on the flat screen
-		this.handleFrame is where rendering to VR or AR happens
-	*/
-	testRenderToElement(){
-		this.el.innerHTML = ''
-		this.renderer = new THREE.WebGLRenderer({ antialias: true })
-		this.renderer.setPixelRatio(window.devicePixelRatio)
-		this.renderer.setSize(1024, 1024)
-		this.el.appendChild(this.renderer.domElement)
-
-		let width = parseInt(window.getComputedStyle(this.el).width)
-		let height = parseInt(window.getComputedStyle(this.el).height)
-		this.camera.aspect = width / height
-		this.camera.updateProjectionMatrix()
-		this.renderer.setSize(width, height)
-
-		let animate = function(){
-			requestAnimationFrame(animate)
-			this.scene.children[0].rotation.x += 0.005
-			this.scene.children[0].rotation.y += 0.01
-			this.renderer.render(this.scene, this.camera)
-		}.bind(this)
-		requestAnimationFrame(animate)
 	}
 
 	handleNewSession(session){
@@ -105,46 +69,47 @@ class XRExampleBase {
 		this.session.addEventListener('blur', ev => { this.handleSessionBlur(ev) })
 		this.session.addEventListener('end', ev => { this.handleSessionEnded(ev) })
 
+		// Create a canvas and context for the layer
+		let glCanvas = document.createElement('canvas')
+		let glContext = glCanvas.getContext('webgl')
+
+		this.session.layer = new XRWebGLLayer(this.session, glContext)
+
 		// Handle layer focus events
 		this.session.layer.addEventListener('focus', ev => { this.handleLayerFocus(ev) })
 		this.session.layer.addEventListener('blur', ev => { this.handleLayerBlur(ev) })
-
-		// Create a canvas and context for the layer
-		let glCanvas = document.createElement('canvas')
-		let glContext = glCanvas.getContext('webgl', { compatibleXRDisplay: this.display })
-		this.session.layer = new XRWebGLLayer(this.session, glContext)
 
 		// Set up the THREE renderer with the session's layer's glContext
 		this.renderer = new THREE.WebGLRenderer({
 			canvas: glCanvas,
 			context: glContext
 		})
-		this.renderer.setPixelRatio(1) // What should this be?
+		this.renderer.setPixelRatio(1)
+
+		/*
+		This part is a bit bogus and relies on the polyfill only returning a MagicWindowDisplay
+		*/
+		const width = parseInt(window.getComputedStyle(this.el).width)
+		const height = parseInt(window.getComputedStyle(this.el).height)
+		this.camera.aspect = width / height
+		this.camera.updateProjectionMatrix()
+		this.renderer.setSize(width, height)
+		document.body.innerHTML = ''
+		document.body.appendChild(this.renderer.domElement)
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
 
 			// Reqest the Reality change and then set up its XRLayer
 			this.session.requestRealityChange(reality).then(() => {
-				// Create a canvas and context for the Reality's layer
-				let realityCanvas = document.createElement('canvas')
-				let realityContext = realityCanvas.getContext('webgl', { compatibleXRDisplay: this.display })
-				this.realityLayer = new XRWebGLLayer(this.session, realityContext)
-
-				// Attempt to set the Reality's layer, which should succeed since this script created it
-				reality.setLayer(this.realityLayer).then(() => {
-					this.session.requestFrame(frame => { this.handleFrame(frame) })
-				}).catch(err => {
-					console.error('Error requesting the Reality layer', err)
-					this.session.endSession()
-					return
-				})
+				this.session.requestFrame(frame => { this.handleFrame(frame) })
+			}).error(err => {
+				console.error('Could not change realities')
 			})
 		} else {
 			// The session's reality defaults to the most recently used shared reality
 			this.session.requestFrame(frame => { this.handleFrame(frame) })
 		}
-
 	}
 
 	// Extending classes can react to these events
@@ -160,15 +125,13 @@ class XRExampleBase {
 	initializeScene(){}
 
 	/*
-		Extending classes that need to update the layer or reality scenes during each frame should override these methods
+		Extending classes that need to update the layer during each frame should override these methods
 	*/
 	updateScene(frame, coordinateSystem, pose){}
-	updateRealityScene(frame, coordinateSystem, pose){}
 
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
-
-		let coordinateSystem = this.frame.getCoordinateSystem(...this.frameOfReferenceTypes)
+		let coordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
 		if(coordinateSystem === null){
 			this.showMessage('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
@@ -176,26 +139,15 @@ class XRExampleBase {
 			// Production apps could render a 'waiting' message and keep checking for an acceptable coordinate system
 			return
 		}
-
 		let pose = frame.getViewPose(coordinateSystem)
-
-		if(this.realityLayer){
-			this.updateRealityScene(frame, coordinateSystem, pose)
-		}
-
 		this.updateScene(frame, coordinateSystem, pose)
-
-		if(this.realityLayer){
-			// Todo render into the Reality layer the way we render into the session layer in the code below
-		}
 
 		this.renderer.autoClear = false
 		this.scene.matrixAutoUpdate = false
-
-		this.renderer.setSize(this.session.layer.frameBufferWidth, this.session.layer.frameBufferWidth)
+		this.renderer.setSize(this.session.layer.framebufferWidth, this.session.layer.framebufferHeight)
 		this.renderer.clear()
 
-		this.session.layer.context.bindFramebuffer(this.session.layer.framebuffer)
+		//this.session.layer.context.bindFramebuffer(this.session.layer.context.FRAMEBUFFER, this.session.layer.framebuffer)
 
 		// Render each view into this.session.layer.context
 		for(const view of frame.views){

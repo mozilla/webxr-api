@@ -28,7 +28,7 @@ class ARAnchorExample extends XRExampleBase {
 
 	// Called during construction
 	initializeScene(){
-		fillInBoxScene(this.scene)		
+		fillInBoxScene(this.scene)
 	}
 
 	/*
@@ -46,7 +46,8 @@ class ARAnchorExample extends XRExampleBase {
 	updateScene(frame, coordinateSystem, pose){
 		// Create anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
-			const anchor = new XRAnchor(new XRCoordinates(coordinateSystem, [x, y, z], [0, 0, 0, 1]))
+
+			const anchor = new XRAnchor(new XRCoordinates(this.session, coordinateSystem, [x, y, z]))
 			const anchorUID = frame.addAnchor(anchor)
 			this.anchoredModels.push({
 				anchorUID: anchorUID,
