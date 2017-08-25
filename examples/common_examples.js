@@ -37,7 +37,7 @@ class XRExampleBase {
 				this.showMessage('No displays are available')
 				return
 			}
-			this.display = displays[0] // production code would allow the user to choose, this code assumes that this is a MagicWindowDisplay
+			this.display = displays[0] // production code would allow the user to choose, this code assumes that this is a FlatDisplay
 
 			this.display.requestSession({
 				exclusive: this.createVirtualReality,
@@ -90,15 +90,14 @@ class XRExampleBase {
 		this.renderer.setClearColor('#000', 0)
 
 		/*
-		This part is a bit bogus and relies on the polyfill only returning a MagicWindowDisplay
+		This part is a bit bogus and relies on the polyfill only returning a FlatDisplay
 		*/
 		const width = parseInt(window.getComputedStyle(this.el).width)
 		const height = parseInt(window.getComputedStyle(this.el).height)
 		this.camera.aspect = width / height
 		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(width, height)
-		document.body.innerHTML = ''
-		document.body.appendChild(this.renderer.domElement)
+		this.el.appendChild(this.renderer.domElement)
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
@@ -167,9 +166,9 @@ class XRExampleBase {
 
 function fillInBoxScene(scene){
 	let geometry = new THREE.BoxBufferGeometry(1, 1, 1)
-	let material = new THREE.MeshPhongMaterial({ color: '#DDDDDD' })
+	let material = new THREE.MeshPhongMaterial({ color: '#DDFFDD' })
 	let mesh = new THREE.Mesh(geometry, material)
-	mesh.position.set(0, 0, -4)
+	mesh.position.set(0, -1.6, -4)
 	scene.add(mesh)
 
 	let ambientLight = new THREE.AmbientLight('#FFF', 1)

@@ -1,20 +1,20 @@
 import XRDisplay from '../XRDisplay.js'
-import XRFieldOfView from '../XRFieldOfView.js'
-import MagicWindowSession from './MagicWindowSession.js'
-import MagicWindowView from './MagicWindowView.js'
-import MatrixMath from './MatrixMath.js'
+import XRView from '../XRView.js'
+import XRSession from '../XRSession.js'
 
-import ARKitWrapper from '../arkit/ARKitWrapper.js'
+import MatrixMath from '../fill/MatrixMath.js'
+
+import ARKitWrapper from '../platform/ARKitWrapper.js'
 
 /*
-MagicWindowDisplay takes over a handset's full screen and presents a moving view into an XR scene, as if it were a magic window.
+FlatDisplay takes over a handset's full screen and presents a moving view into a Reality, as if it were a magic window.
 */
-export default class MagicWindowDisplay extends XRDisplay {
-	constructor(){
-		super()
+export default class FlatDisplay extends XRDisplay {
+	constructor(xr){
+		super(xr, 'Magic Window', false)
 		this._arKitWrapper = null
 
-		this._views.push(new MagicWindowView(this._fov, this._depthNear, this._depthFar))
+		this._views.push(new XRView(this._fov, this._depthNear, this._depthFar))
 
 		if(ARKitWrapper.hasARKit()){
 			this._arKitWrapper = new ARKitWrapper(this._handleARKitInit.bind(this))
@@ -39,7 +39,7 @@ export default class MagicWindowDisplay extends XRDisplay {
 
         const cameraProjectionMatrix = this._arKitWrapper.getData('projection_camera')
         if(cameraProjectionMatrix){
-			this._views[0]._setProjectionMatrix(cameraProjectionMatrix)
+			this._views[0].setProjectionMatrix(cameraProjectionMatrix)
         } else {
         	console.log('no projection camera', this._arKitWrapper.rawARData)
         }
@@ -59,7 +59,7 @@ export default class MagicWindowDisplay extends XRDisplay {
 	}
 
 	_getSession(parameters){
-		return new MagicWindowSession(this)
+		return new XRSession(this._xr, this, parameters, this.reality)
 	}
 
 	_supportedCreationParameters(parameters){

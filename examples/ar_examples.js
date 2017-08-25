@@ -25,11 +25,23 @@ class ARAnchorExample extends XRExampleBase {
 		super(domElement, ['headModel'], false)
 		this.anchorsToAdd = [] // { node, x, y, z }
 		this.anchoredNodes = [] // { anchorUID, node }
+		this.addObjectButton = document.createElement('button')
+		this.addObjectButton.setAttribute('class', 'add-object-button')
+		this.addObjectButton.innerText = 'Add'
+		this.el.appendChild(this.addObjectButton)
+		this.addObjectButton.addEventListener('click', ev => {
+			this.addAnchoredModel(this.createSceneGraphNode(), 0, 0, -2)
+		})
 	}
 
 	// Called during construction
 	initializeScene(){
-		fillInBoxScene(this.scene)
+	}
+
+	createSceneGraphNode(){
+		let geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2)
+		let material = new THREE.MeshPhongMaterial({ color: '#FF9999' })
+		return new THREE.Mesh(geometry, material)
 	}
 
 	/*
@@ -47,8 +59,7 @@ class ARAnchorExample extends XRExampleBase {
 	updateScene(frame, coordinateSystem, pose){
 		// Create anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
-
-			const anchor = new XRAnchor(new XRCoordinates(this.session, coordinateSystem, [x, y, z]))
+			const anchor = new XRAnchor(new XRCoordinates(this.session, coordinateSystem, [anchorToAdd.x, anchorToAdd.y, anchorToAdd.z]))
 			const anchorUID = frame.addAnchor(anchor)
 			this.anchoredModels.push({
 				anchorUID: anchorUID,

@@ -20,7 +20,8 @@ import XRLayer from './XRLayer.js'
 import XRWebGLLayer from './XRWebGLLayer.js'
 
 import EventHandlerBase from './fill/EventHandlerBase.js'
-import MagicWindowDisplay from './fill/MagicWindowDisplay.js'
+import FlatDisplay from './display/FlatDisplay.js'
+import MagicWindowReality from './reality/MagicWindowReality.js'
 
 /*
 XRPolyfill implements the window.XR functionality as a polyfill
@@ -49,12 +50,15 @@ class XRPolyfill extends EventHandlerBase {
 		window.XRLayer = XRLayer
 		window.XRWebGLLayer = XRWebGLLayer
 
-		this.displays = [new MagicWindowDisplay()]
+
+		this._displays = [new FlatDisplay(this)]
+		this._sharedRealities = [new MagicWindowReality(this)]
+		this._privateRealities = []
 	}
 
 	getDisplays(){
 		return new Promise((resolve, reject) => {
-			resolve(this.displays)
+			resolve(this._displays)
 		})
 	}
 

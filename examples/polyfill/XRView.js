@@ -20,6 +20,12 @@ export default class XRView {
 
 	get projectionMatrix(){ return this._projectionMatrix }
 
+	setProjectionMatrix(array16){
+		for(let i=0; i < 16; i++){
+			this._projectionMatrix[i] = array16[i]
+		}
+	}
+
 	getViewport(layer){
 		if(this._eye === XRView.LEFT){
 			this._viewport.x = 0

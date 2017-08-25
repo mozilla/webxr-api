@@ -3,11 +3,15 @@ import XRFieldOfView from './XRFieldOfView.js'
 
 /*
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
+
+This doesn't yet support geospatial
 */
 export default class XRDisplay extends EventHandlerBase {
-	constructor(){
+	constructor(xr, displayName, isExternal){
 		super()
-		// This doesn't yet support geospatial
+		this._xr = xr
+		this._displayName = displayName
+		this._isExternal = isExternal
 
 		this._headModelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.HEAD_MODEL)
 		this._eyeLevelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.EYE_LEVEL)
@@ -24,15 +28,9 @@ export default class XRDisplay extends EventHandlerBase {
 		this._views = []
 	}
 
-	get displayName(){
-		//readonly attribute DOMString displayName
-		throw 'Not implemented'
-	}
+	get displayName(){ return this._displayName }
 
-	get isExternal(){
-		//readonly attribute boolean isExternal;
-		throw 'Not implemented'
-	}
+	get isExternal(){ return this._isExternal }
 
 	supportsSession(parameters){
 		// parameters: XRSessionCreateParametersInit 
@@ -53,11 +51,11 @@ export default class XRDisplay extends EventHandlerBase {
 	}
 
 	_getSession(parameters){
-		return 'Not implemented'
+		throw 'Should be implemented by extending class'
 	}
 
 	_supportedCreationParameters(parameters){
-		return 'Not implemented'
+		throw 'Should be implemented by extending class'
 	}
 
 	//attribute EventHandler ondeactivate;
