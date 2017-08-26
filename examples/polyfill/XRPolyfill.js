@@ -51,9 +51,12 @@ class XRPolyfill extends EventHandlerBase {
 		window.XRWebGLLayer = XRWebGLLayer
 
 
-		this._displays = [new FlatDisplay(this)]
+		// Reality instances that may be shared by multiple XRSessions
 		this._sharedRealities = [new MagicWindowReality(this)]
 		this._privateRealities = []
+
+		// Eventually RiftDisplay, ViveDisplay, DaydreamDisplay, GearVRDisplay, CardboardDisplay...
+		this._displays = [new FlatDisplay(this, this._sharedRealities[0])]
 	}
 
 	getDisplays(){

@@ -164,11 +164,29 @@ class XRExampleBase {
 	}
 }
 
+function fillInTeapotScene(scene){
+	var geometry = new THREE.TeapotBufferGeometry(0.1)
+	let materialColor = new THREE.Color()
+	materialColor.setRGB(1.0, 1.0, 1.0)
+	let material = new THREE.MeshLambertMaterial({ color: materialColor, side: THREE.DoubleSide })
+	let mesh = new THREE.Mesh(geometry, material)
+	mesh.position.set(0, 0, -1)
+	scene.add(mesh)
+
+	let ambientLight = new THREE.AmbientLight('#FFF', 0.4)
+	scene.add(ambientLight)
+
+	let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
+	scene.add(directionalLight)
+
+	return scene
+}
+
 function fillInBoxScene(scene){
-	let geometry = new THREE.BoxBufferGeometry(1, 1, 1)
+	let geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2)
 	let material = new THREE.MeshPhongMaterial({ color: '#DDFFDD' })
 	let mesh = new THREE.Mesh(geometry, material)
-	mesh.position.set(0, -1.6, -4)
+	mesh.position.set(0, 0, -0.8)
 	scene.add(mesh)
 
 	let ambientLight = new THREE.AmbientLight('#FFF', 1)

@@ -35,7 +35,7 @@ export default class XRPresentationFrame {
 
 	get anchors(){
 		//readonly attribute sequence<XRAnchor> anchors;
-		return this._session._reality._anchors
+		return this._session.reality._anchors
 	}
 
 	addAnchor(anchor){
@@ -43,18 +43,18 @@ export default class XRPresentationFrame {
 		if(anchor instanceof XRAnchor === false){
 			throw 'Not an XRAnchor'
 		}
-		this._session._reality._anchors.push(anchor)
-		return this._session._reality._anchors.length - 1
+		this._session.reality._anchors.push(anchor)
+		return this._session.reality._anchors.length - 1
 	}
 
 	removeAnchor(uid){
 		// void removeAnchor(DOMString uid);
-		this._session._reality._anchors[uid] = null
+		this._session.reality._anchors[uid] = null
 	}
 
 	getAnchor(uid){
 		// XRAnchor? getAnchor(DOMString uid);
-		return this._session._reality._anchors[uid] || null
+		return this._session.reality._anchors[uid] || null
 	}
 
 	findAnchor(coordinates){

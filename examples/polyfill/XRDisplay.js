@@ -7,11 +7,12 @@ Each XRDisplay represents a method of using a specific type of hardware to rende
 This doesn't yet support geospatial
 */
 export default class XRDisplay extends EventHandlerBase {
-	constructor(xr, displayName, isExternal){
+	constructor(xr, displayName, isExternal, reality){
 		super()
 		this._xr = xr
 		this._displayName = displayName
 		this._isExternal = isExternal
+		this._reality = reality // The Reality instance that is currently displayed
 
 		this._headModelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.HEAD_MODEL)
 		this._eyeLevelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.EYE_LEVEL)

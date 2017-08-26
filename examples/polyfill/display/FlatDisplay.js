@@ -10,8 +10,8 @@ import ARKitWrapper from '../platform/ARKitWrapper.js'
 FlatDisplay takes over a handset's full screen and presents a moving view into a Reality, as if it were a magic window.
 */
 export default class FlatDisplay extends XRDisplay {
-	constructor(xr){
-		super(xr, 'Magic Window', false)
+	constructor(xr, reality){
+		super(xr, 'Flat', false, reality)
 		this._arKitWrapper = null
 
 		this._views.push(new XRView(this._fov, this._depthNear, this._depthFar))
@@ -19,14 +19,6 @@ export default class FlatDisplay extends XRDisplay {
 		if(ARKitWrapper.hasARKit()){
 			this._arKitWrapper = new ARKitWrapper(this._handleARKitInit.bind(this))
 		}
-	}
-
-	get displayName(){
-		return 'Magic Window'
-	}
-
-	get isExternal(){
-		return false
 	}
 
 	_handleARKitUpdate(...params){
@@ -59,7 +51,7 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_getSession(parameters){
-		return new XRSession(this._xr, this, parameters, this.reality)
+		return new XRSession(this._xr, this, parameters)
 	}
 
 	_supportedCreationParameters(parameters){

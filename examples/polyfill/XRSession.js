@@ -4,12 +4,11 @@ import EventHandlerBase from './fill/EventHandlerBase.js'
 A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as make a request for an animation frame.
 */
 export default class XRSession extends EventHandlerBase {
-	constructor(xr, display, createParameters, reality){
+	constructor(xr, display, createParameters){
 		super(xr)
 		this._xr = xr
 		this._display = display
 		this._createParameters = createParameters
-		this._reality = reality
 
 		this._baseLayer = null
 		this._stageBounds = null
@@ -21,7 +20,7 @@ export default class XRSession extends EventHandlerBase {
 
 	get realities(){ return this._xr._sharedRealities }
 
-	get reality(){ return this._reality }
+	get reality(){ return this._display._reality }
 
 	get baseLayer(){ return this._baseLayer }
 	set baseLayer(value){ this._baseLayer = value }
@@ -42,7 +41,7 @@ export default class XRSession extends EventHandlerBase {
 				reject()
 				return
 			}
-			this._reality = reality
+			this._display._reality = reality
 			resolve()
 		})
 	}

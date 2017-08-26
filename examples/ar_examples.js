@@ -8,7 +8,7 @@ class ARSimplestExample extends XRExampleBase {
 
 	// Called during construction
 	initializeScene(){
-		fillInBoxScene(this.scene)		
+		fillInTeapotScene(this.scene)
 		this.scene.children[0].rotation.y += 0.5
 	}
 
