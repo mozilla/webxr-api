@@ -29,7 +29,7 @@ export default class EventHandlerBase {
 	}
 
 	dispatchEvent(event){
-		let listeners = this._listeners.get(type)
+		let listeners = this._listeners.get(event.type)
 		if(Array.isArray(listeners) === false) return
 		for(let listener of listeners){
 			listener(event)

@@ -25,12 +25,13 @@ class ARAnchorExample extends XRExampleBase {
 		super(domElement, ['headModel'], false)
 		this.anchorsToAdd = [] // { node, x, y, z }
 		this.anchoredNodes = [] // { anchorUID, node }
+
 		this.addObjectButton = document.createElement('button')
 		this.addObjectButton.setAttribute('class', 'add-object-button')
 		this.addObjectButton.innerText = 'Add'
 		this.el.appendChild(this.addObjectButton)
 		this.addObjectButton.addEventListener('click', ev => {
-			this.addAnchoredModel(this.createSceneGraphNode(), 0, 0, -2)
+			this.addAnchoredModel(this.createSceneGraphNode(), 0, 0, -0.5)
 		})
 	}
 
@@ -59,12 +60,13 @@ class ARAnchorExample extends XRExampleBase {
 	updateScene(frame, coordinateSystem, pose){
 		// Create anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
-			const anchor = new XRAnchor(new XRCoordinates(this.session, coordinateSystem, [anchorToAdd.x, anchorToAdd.y, anchorToAdd.z]))
+			const anchor = new XRAnchor(new XRCoordinates(this.session.display, coordinateSystem, [anchorToAdd.x, anchorToAdd.y, anchorToAdd.z]))
 			const anchorUID = frame.addAnchor(anchor)
-			this.anchoredModels.push({
+			this.anchoredNodes.push({
 				anchorUID: anchorUID,
 				node: anchorToAdd.node
 			})
+			console.log("Added anchor", anchorUID)
 		}
 		this.anchorsToAdd = []
 		
@@ -75,7 +77,7 @@ class ARAnchorExample extends XRExampleBase {
 				console.error('Unknown anchor ID', anchoredNode.anchorId)
 			} else {
 				const localCoordinates = anchor.coordinates.getTransformedCoordinates(coordinateSystem)
-				anchoredNode.node.fromArray(localCoordinates.poseMatrix)
+				anchoredNode.node.matrix.fromArray(localCoordinates.poseMatrix)
 			}
 		}
 	}

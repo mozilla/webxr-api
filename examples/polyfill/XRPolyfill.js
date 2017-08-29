@@ -21,10 +21,13 @@ import XRWebGLLayer from './XRWebGLLayer.js'
 
 import EventHandlerBase from './fill/EventHandlerBase.js'
 import FlatDisplay from './display/FlatDisplay.js'
-import MagicWindowReality from './reality/MagicWindowReality.js'
+import CameraReality from './reality/CameraReality.js'
 
 /*
 XRPolyfill implements the window.XR functionality as a polyfill
+
+Code below will check for window.XR and if it doesn't exist will install this polyfill,
+so you can safely include this script in any page.
 */
 class XRPolyfill extends EventHandlerBase {
 	constructor(){
@@ -52,7 +55,7 @@ class XRPolyfill extends EventHandlerBase {
 
 
 		// Reality instances that may be shared by multiple XRSessions
-		this._sharedRealities = [new MagicWindowReality(this)]
+		this._sharedRealities = [new CameraReality(this)]
 		this._privateRealities = []
 
 		// Eventually RiftDisplay, ViveDisplay, DaydreamDisplay, GearVRDisplay, CardboardDisplay...

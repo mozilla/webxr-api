@@ -1,7 +1,8 @@
 import EventHandlerBase from './fill/EventHandlerBase.js'
 
 /*
-A script that wishes to make use of an XRDisplay can request an XRSession. This session provides a list of the available realities that the script may request as well as make a request for an animation frame.
+A script that wishes to make use of an XRDisplay can request an XRSession.
+An XRSession provides a list of the available Reality instances that the script may request as well as make a request for an animation frame.
 */
 export default class XRSession extends EventHandlerBase {
 	constructor(xr, display, createParameters){
@@ -50,13 +51,14 @@ export default class XRSession extends EventHandlerBase {
 		if(typeof callback !== 'function'){
 			throw 'Invalid callback'
 		}
+		// TODO If ARKit is present, switch to using the ARKit watch callback
 		return window.requestAnimationFrame(() => {
 			callback(this._createPresentationFrame())
 		})
 	}
 
 	cancelFrame(handle){
-		return cancelAnimationFrame(handle)
+		return window.cancelAnimationFrame(handle)
 	}
 
 	end(){

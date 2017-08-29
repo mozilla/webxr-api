@@ -35,31 +35,31 @@ export default class XRPresentationFrame {
 
 	get anchors(){
 		//readonly attribute sequence<XRAnchor> anchors;
-		return this._session.reality._anchors
+		let results = []
+		for(let value of this._session.reality._anchors.values()){
+			results.push(value)
+		}
+		return results
 	}
 
 	addAnchor(anchor){
-		//long addAnchor(XRAnchor anchor);
-		if(anchor instanceof XRAnchor === false){
-			throw 'Not an XRAnchor'
-		}
-		this._session.reality._anchors.push(anchor)
-		return this._session.reality._anchors.length - 1
-	}
-
-	removeAnchor(uid){
-		// void removeAnchor(DOMString uid);
-		this._session.reality._anchors[uid] = null
-	}
-
-	getAnchor(uid){
-		// XRAnchor? getAnchor(DOMString uid);
-		return this._session.reality._anchors[uid] || null
+		//DOMString? addAnchor(XRAnchor anchor);
+		return this._session.reality._addAnchor(anchor)
 	}
 
 	findAnchor(coordinates){
 		// XRAnchorOffset? findAnchor(XRCoordinates); // cast a ray to find or create an anchor at the first intersection in the Reality
-		return null
+		return this._session.reality._findAnchor(coordinates)
+	}
+
+	removeAnchor(uid){
+		// void removeAnchor(DOMString uid);
+		return this._session.reality._removeAnchor(uid)
+	}
+
+	getAnchor(uid){
+		// XRAnchor? getAnchor(DOMString uid);
+		return this._session.reality._getAnchor(uid)
 	}
 
 	getCoordinateSystem(...types){

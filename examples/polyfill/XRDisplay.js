@@ -47,11 +47,11 @@ export default class XRDisplay extends EventHandlerBase {
 				reject()
 				return
 			}
-			resolve(this._getSession(parameters))
+			resolve(this._createSession(parameters))
 		})
 	}
 
-	_getSession(parameters){
+	_createSession(parameters){
 		throw 'Should be implemented by extending class'
 	}
 

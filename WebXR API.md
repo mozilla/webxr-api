@@ -213,7 +213,7 @@ XRAnchorOffset represents a position in relation to an anchor, returned when XRP
 		readonly attribute XRLightEstimate? lightEstimate;
 
 		readonly attribute sequence<XRAnchor> anchors;
-		long addAnchor(XRAnchor anchor);
+		DOMString addAnchor(XRAnchor anchor);
 		void removeAnchor(DOMString uid);
 		XRAnchor? getAnchor(DOMString uid);
 		XRAnchorOffset? findAnchor(XRCoordinates); // cast a ray to find or create an anchor at the first intersection in the Reality
