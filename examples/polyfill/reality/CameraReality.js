@@ -43,7 +43,7 @@ export default class CameraReality extends Reality {
 				this._initialized = true
 				navigator.mediaDevices.getUserMedia({
 					audio: false,
-					video: { facingMode: "user" }
+					video: { facingMode: "environment" }
 				}).then(stream => {
 					this._videoEl = document.createElement('video')
 					this._videoEl.setAttribute('class', 'camera-reality-video')
