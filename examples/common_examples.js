@@ -75,11 +75,11 @@ class XRExampleBase {
 		let glCanvas = document.createElement('canvas')
 		let glContext = glCanvas.getContext('webgl')
 
-		this.session.layer = new XRWebGLLayer(this.session, glContext)
+		this.session.baseLayer = new XRWebGLLayer(this.session, glContext)
 
 		// Handle layer focus events
-		this.session.layer.addEventListener('focus', ev => { this.handleLayerFocus(ev) })
-		this.session.layer.addEventListener('blur', ev => { this.handleLayerBlur(ev) })
+		this.session.baseLayer.addEventListener('focus', ev => { this.handleLayerFocus(ev) })
+		this.session.baseLayer.addEventListener('blur', ev => { this.handleLayerBlur(ev) })
 
 		// Set up the THREE renderer with the session's layer's glContext
 		this.renderer = new THREE.WebGLRenderer({
@@ -97,7 +97,6 @@ class XRExampleBase {
 		this.camera.aspect = width / height
 		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(width, height)
-		this.el.appendChild(this.renderer.domElement)
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
@@ -146,14 +145,14 @@ class XRExampleBase {
 
 		this.renderer.autoClear = false
 		this.scene.matrixAutoUpdate = false
-		this.renderer.setSize(this.session.layer.framebufferWidth, this.session.layer.framebufferHeight)
+		this.renderer.setSize(this.session.baseLayer.framebufferWidth, this.session.baseLayer.framebufferHeight)
 		this.renderer.clear()
 
-		//this.session.layer.context.bindFramebuffer(this.session.layer.context.FRAMEBUFFER, this.session.layer.framebuffer)
+		//this.session.baseLayer.context.bindFramebuffer(this.session.baseLayer.context.FRAMEBUFFER, this.session.baseLayer.framebuffer)
 
-		// Render each view into this.session.layer.context
+		// Render each view into this.session.baseLayer.context
 		for(const view of frame.views){
-			const viewport = view.getViewport(this.session.layer)
+			const viewport = view.getViewport(this.session.baseLayer)
 			//throttledConsoleLog('pose', pose._poseModelMatrix, viewport)
 			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)

@@ -20,7 +20,7 @@ export default class CameraReality extends Reality {
 
 		// These are used if we do not have access to ARKit
 		this._mediaStream = null
-		this._videoEl = null
+		this._el = null
 	}
 
 	_start(){
@@ -45,22 +45,22 @@ export default class CameraReality extends Reality {
 					audio: false,
 					video: { facingMode: "environment" }
 				}).then(stream => {
-					this._videoEl = document.createElement('video')
-					this._videoEl.setAttribute('class', 'camera-reality-video')
-					this._videoEl.style.position = 'absolute'
-					this._videoEl.style.width = '100%'
-					this._videoEl.style.height = '100vh'
-					this._videoEl.srcObject = stream
-					document.body.prepend(this._videoEl)
-					this._videoEl.play()
+					this._el = document.createElement('video')
+					this._el.setAttribute('class', 'camera-reality-video')
+					this._el.style.position = 'absolute'
+					this._el.style.width = '100%'
+					this._el.style.height = '100vh'
+					this._el.srcObject = stream
+					document.body.prepend(this._el)
+					this._el.play()
 				}).catch(err => {
 					console.error('Could not set up video stream', err)
 					this._initialized = false
 					this._running = false
 				})
 			} else {
-				document.body.prepend(this._videoEl)
-				this._videoEl.play()
+				document.body.prepend(this._el)
+				this._el.play()
 			}
 		}
 	}
@@ -72,11 +72,11 @@ export default class CameraReality extends Reality {
 			}
 			this._arKitWrapper.stop()
 		} else {
-			if(this._videoEl === null){
+			if(this._el === null){
 				return
 			}
-			document.body.removeChild(this._videoEl)
-			this._videoEl.pause()
+			document.body.removeChild(this._el)
+			this._el.pause()
 		}
 	}
 

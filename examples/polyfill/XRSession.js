@@ -13,6 +13,11 @@ export default class XRSession extends EventHandlerBase {
 
 		this._baseLayer = null
 		this._stageBounds = null
+
+		this._el = document.createElement('div')
+		this._el.style.position = 'absolute'
+		this._el.style.width = '100%'
+		this._el.style.width = '100vh'
 	}
 
 	get display(){ return this._display }
@@ -24,7 +29,19 @@ export default class XRSession extends EventHandlerBase {
 	get reality(){ return this._display._reality }
 
 	get baseLayer(){ return this._baseLayer }
-	set baseLayer(value){ this._baseLayer = value }
+
+	set baseLayer(value){
+		console.log('Base layer', value)
+		this._baseLayer = value
+		if(this._baseLayer === null){
+			this._el.innerHTML = ''
+		} else {
+			this._baseLayer._context.canvas.style.width = '100%'
+			this._baseLayer._context.canvas.style.height = '100vh'
+			this._el.appendChild(this._baseLayer._context.canvas)
+			document.body.prepend(this._baseLayer._context.canvas)
+		}
+	}
 
 	get depthNear(){ this._display._depthNear }
 	set depthNear(value){ this._display._depthNear = value }
