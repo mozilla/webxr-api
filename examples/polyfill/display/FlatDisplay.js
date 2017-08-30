@@ -53,6 +53,7 @@ export default class FlatDisplay extends XRDisplay {
 				this._deviceOrientation = new THREE.Quaternion()
 				this._devicePosition = new THREE.Vector3()
 				this._deviceScale = new THREE.Vector3(1, 1, 1)
+				this._deviceWorldMatrix = new THREE.Matrix4()
 				this._deviceOrientationTracker = new DeviceOrientationTracker()
 				this._deviceOrientationTracker.addEventListener(DeviceOrientationTracker.ORIENTATION_UPDATE_EVENT_NAME, this._updateFromDeviceOrientationTracker.bind(this))
 			}
