@@ -10,9 +10,15 @@ NOTHING IN THIS REPO COMES WITH ANY WARRENTY WHATSOEVER. DO NOT USE IT FOR ANYTH
 
 Note: There are a lot of pieces of the WebXR polyfill that are stubbed out and throw 'Not implemented' when called. The paths that are used by the example apps are starting to be filled in, but things like cartographic coordinates and geospatial coordinate systems are not yet implemented.
 
-Clone this repo and then change directories into webxr-api/examples/, then run `python -m SimpleHTTPServer 8000` or some similar command to start up a simple static file HTTPd.
+Clone this repo and then change directories into webxr-api/examples/
 
-The code uses ES modules, so you'll need to enable that in your browser. [This article](https://jakearchibald.com/2017/es-modules-in-browsers/) tells you how to do that for Firefox, Chome, and Edge. If you're running Safari 10.1+, it already works.
+Run the following:
+
+	npm install
+	npm run build
+	npm run start
+
+Then go to http://your-host-name:8080/ to run the app.
 
 Look in ar_examples.html for an example of what scripts to load and how to start up an app. common_examples.js has a nice base class that wraps up all of the boilerplate of starting a WebXR session and rendering into a WebGL layer.
 
