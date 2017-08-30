@@ -50,9 +50,9 @@ export default class CameraReality extends Reality {
 					this._videoEl.setAttribute('playsinline', true);
 					this._videoEl.style.position = 'absolute'
 					this._videoEl.style.width = '100%'
-					this._videoEl.style.height = '100vh'
+					this._videoEl.style.height = '100%'
 					this._videoEl.srcObject = stream
-					document.body.prepend(this._videoEl)
+					document.getElementById("target").prepend(this._videoEl)
 					this._videoEl.play()
 				}).catch(err => {
 					console.error('Could not set up video stream', err)
