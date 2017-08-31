@@ -36,11 +36,13 @@
 		<div id="target" />
 		<script>
 			window.addEventListener('DOMContentLoaded', () => {
-				try {
-					window.pageApp = new ARSimplestExample(document.getElementById('target'))
-				} catch(e) {
-					console.error('page error', e)
-				}
+				setTimeout(() => {
+					try {
+						window.pageApp = new ARSimplestExample(document.getElementById('target'))
+					} catch(e) {
+						console.error('page error', e)
+					}
+				}, 1000)
 			})
 		</script>
 	</body>

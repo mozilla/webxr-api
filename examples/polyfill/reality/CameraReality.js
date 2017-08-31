@@ -1,5 +1,6 @@
 import Reality from '../Reality.js'
 import ARKitWrapper from '../platform/ARKitWrapper.js'
+import ARCoreCameraRenderer from '../platform/ARCoreCameraRenderer.js'
 
 /*
 CameraReality displays the forward facing camera.
@@ -20,14 +21,53 @@ export default class CameraReality extends Reality {
 
 		// These are used if we do not have access to ARKit
 		this._mediaStream = null
-		this._el = null
+		this._videoEl = null
+
+		// These are used if we're using the Google ARCore web app
+		this._arCoreCameraRenderer = null
+		this._arCoreCanvas = null
+		this._elContext = null
+		this._vrDisplay = null
+
+		if(typeof navigator.getVRDisplays === 'function'){
+			navigator.getVRDisplays().then(displays => {
+				for(let display of displays){
+					if(display === null) continue
+					if(display.capabilities.hasPassThroughCamera){
+						this._vrDisplay = display
+						this._arCoreCanvas = document.createElement('canvas')
+						this._xr._realityEls.appendChild(this._arCoreCanvas)
+						this._arCoreCanvas.width = window.innerWidth
+						this._arCoreCanvas.height = window.innerHeight
+						this._elContext = this._arCoreCanvas.getContext('webgl')
+						if(this._elContext === null){
+							throw 'Could not create CameraReality GL context'
+						}
+						window.addEventListener('resize', () => {
+							this._arCoreCanvas.width = window.innerWidth
+							this._arCoreCanvas.height = window.innerHeight
+						}, false)
+						break
+					}
+				}
+			})
+		}
+	}
+
+	_render(){
+		if(this._arCoreCameraRenderer){
+			this._arCoreCameraRenderer.render()
+		}
 	}
 
 	_start(){
 		if(this._running) return
 		this._running = true
 
-		if(ARKitWrapper.HasARKit()){
+		if(this._vrDisplay !== null){ // Using ARCore
+			this._arCoreCameraRenderer = new ARCoreCameraRenderer(this._vrDisplay, this._elContext)
+			this._initialized = true
+		} else if(ARKitWrapper.HasARKit()){ // Using ARKit
 			if(this._initialized === false){
 				this._initialized = true
 				this._arKitWrapper = ARKitWrapper.GetOrCreate()
@@ -38,30 +78,28 @@ export default class CameraReality extends Reality {
 			} else {
 				this._arKitWrapper.watch()
 			}
-		} else {
+		} else { // Using WebRTC
 			if(this._initialized === false){
 				this._initialized = true
 				navigator.mediaDevices.getUserMedia({
 					audio: false,
 					video: { facingMode: "environment" }
 				}).then(stream => {
-					this._el = document.createElement('video')
-					this._el.setAttribute('class', 'camera-reality-video')
-                    this._el.setAttribute('playsinline', true);
-					this._el.style.position = 'absolute'
-					this._el.style.width = '100%'
-					this._el.style.height = '100vh'
-					this._el.srcObject = stream
-					document.body.prepend(this._el)
-					this._el.play()
+					this._videoEl = document.createElement('video')
+					this._xr._realityEls.appendChild(this._videoEl)
+					this._videoEl.setAttribute('class', 'camera-reality-video')
+                    this._videoEl.setAttribute('playsinline', true);
+					this._videoEl.style.width = '100%'
+					this._videoEl.style.height = '100%'
+					this._videoEl.srcObject = stream
+					this._videoEl.play()
 				}).catch(err => {
 					console.error('Could not set up video stream', err)
 					this._initialized = false
 					this._running = false
 				})
 			} else {
-				document.body.prepend(this._el)
-				this._el.play()
+				this._videoEl.play()
 			}
 		}
 	}
@@ -72,12 +110,8 @@ export default class CameraReality extends Reality {
 				return
 			}
 			this._arKitWrapper.stop()
-		} else {
-			if(this._el === null){
-				return
-			}
-			document.body.removeChild(this._el)
-			this._el.pause()
+		} else if(this._videoEl !== null){
+			this._videoEl.pause()
 		}
 	}
 

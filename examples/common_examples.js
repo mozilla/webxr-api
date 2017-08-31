@@ -30,7 +30,6 @@ class XRExampleBase {
 		}
 
 
-
 		// Get a display and then request a session
 		navigator.XR.getDisplays().then(displays => {
 			if(displays.length == 0) {
@@ -38,7 +37,6 @@ class XRExampleBase {
 				return
 			}
 			this.display = displays[0] // production code would allow the user to choose, this code assumes that this is a FlatDisplay
-
 			this.display.requestSession({
 				exclusive: this.createVirtualReality,
 				type: this.createVirtualReality ? XRSession.REALITY : XRSession.AUGMENTATION
@@ -48,6 +46,8 @@ class XRExampleBase {
 				console.error('Error requesting session', err)
 				this.showMessage('Could not initiate the session')
 			})
+		}).catch(err => {
+			console.error('Could not get XR displays', err)
 		})
 	}
 
@@ -74,7 +74,9 @@ class XRExampleBase {
 		// Create a canvas and context for the layer
 		let glCanvas = document.createElement('canvas')
 		let glContext = glCanvas.getContext('webgl')
-
+		if(glContext === null){
+			throw 'Could not create GL context'
+		}
 		this.session.baseLayer = new XRWebGLLayer(this.session, glContext)
 
 		// Handle layer focus events
@@ -84,21 +86,21 @@ class XRExampleBase {
 		// Set up the THREE renderer with the session's layer's glContext
 		this.renderer = new THREE.WebGLRenderer({
 			canvas: glCanvas,
-			context: glContext
+			context: glContext,
+			alpha: true
 		})
 		this.renderer.setPixelRatio(1)
+		this.renderer.autoClear = false
 		this.renderer.setClearColor('#000', 0)
 
 		/*
 		This part is a bit bogus and relies on the polyfill only returning a FlatDisplay
 		*/
-		const width = parseInt(window.getComputedStyle(this.el).width)
-		const height = parseInt(window.getComputedStyle(this.el).height)
+		const width = parseInt(window.getComputedStyle(document.body).width)
+		const height = parseInt(window.getComputedStyle(document.body).height)
 		this.camera.aspect = width / height
 		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(width, height)
-		this.renderer.domElement.style.position = 'absolute'
-
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
@@ -145,10 +147,11 @@ class XRExampleBase {
 		let pose = frame.getViewPose(coordinateSystem)
 		this.updateScene(frame, coordinateSystem, pose)
 
+		this.renderer.resetGLState()
 		this.renderer.autoClear = false
 		this.scene.matrixAutoUpdate = false
 		this.renderer.setSize(this.session.baseLayer.framebufferWidth, this.session.baseLayer.framebufferHeight)
-		this.renderer.clear()
+		//this.renderer.clear()
 
 		//this.session.baseLayer.context.bindFramebuffer(this.session.baseLayer.context.FRAMEBUFFER, this.session.baseLayer.framebuffer)
 

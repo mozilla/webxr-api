@@ -10,8 +10,8 @@ import ARKitWrapper from '../platform/ARKitWrapper.js'
 FlatDisplay takes over a handset's full screen and presents a moving view into a Reality, as if it were a magic window.
 
 If ARKit is present, it uses the ARKit updates to set the headModel pose.
-
-TODO if ARKit is not present, use orientation events.
+If ARCore is available on the VRDisplays, use that to pose the headModel. (TODO)
+Otherwise, use orientation events.
 */
 export default class FlatDisplay extends XRDisplay {
 	constructor(xr, reality){
