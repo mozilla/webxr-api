@@ -97,6 +97,8 @@ class XRExampleBase {
 		this.camera.aspect = width / height
 		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(width, height)
+		this.renderer.domElement.style.position = 'absolute'
+
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
