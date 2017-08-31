@@ -47,6 +47,7 @@ export default class CameraReality extends Reality {
 				}).then(stream => {
 					this._el = document.createElement('video')
 					this._el.setAttribute('class', 'camera-reality-video')
+                    this._el.setAttribute('playsinline', true);
 					this._el.style.position = 'absolute'
 					this._el.style.width = '100%'
 					this._el.style.height = '100vh'

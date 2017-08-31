@@ -99,7 +99,6 @@ class XRExampleBase {
 		this.renderer.setSize(width, height)
 		this.session.baseLayer.appendChild(this.renderer.domElement)
 		this.renderer.domElement.style.position = 'absolute'
-		// this.el.style.position = 'relative';
 
 
 		if(this.createVirtualReality){
