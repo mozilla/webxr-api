@@ -97,7 +97,6 @@ class XRExampleBase {
 		this.camera.aspect = width / height
 		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(width, height)
-		this.session.baseLayer.appendChild(this.renderer.domElement)
 		this.renderer.domElement.style.position = 'absolute'
 
 

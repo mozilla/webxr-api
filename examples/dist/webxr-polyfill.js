@@ -3014,6 +3014,7 @@ var CameraReality = function (_Reality) {
 					}).then(function (stream) {
 						_this2._el = document.createElement('video');
 						_this2._el.setAttribute('class', 'camera-reality-video');
+						_this2._el.setAttribute('playsinline', true);
 						_this2._el.style.position = 'absolute';
 						_this2._el.style.width = '100%';
 						_this2._el.style.height = '100vh';
