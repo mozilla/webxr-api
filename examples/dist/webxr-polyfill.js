@@ -2607,7 +2607,7 @@ var XRViewPose = function () {
 exports.default = XRViewPose;
 
 
-XRViewPose.DEFAULT_EYE_HEIGHT = 1.65; // meters
+XRViewPose.DEFAULT_EYE_HEIGHT = 2; // meters
 
 /***/ }),
 /* 24 */
@@ -3005,7 +3005,7 @@ var DeviceOrientationTracker = function (_EventHandlerBase) {
 			DeviceOrientationTracker.WORKING_EULER.set(this._deviceOrientation.beta * DeviceOrientationTracker.DEG_TO_RAD, this._deviceOrientation.alpha * DeviceOrientationTracker.DEG_TO_RAD, -1 * this._deviceOrientation.gamma * DeviceOrientationTracker.DEG_TO_RAD, 'YXZ');
 			outQuaternion.setFromEuler(DeviceOrientationTracker.WORKING_EULER);
 			outQuaternion.multiply(DeviceOrientationTracker.HALF_PI_AROUND_X);
-			outQuaternion.multiply(DeviceOrientationTracker.WORKING_QUATERNION.setFromAxisAngle(DeviceOrientationTracker.Z_AXIS, -this._windowOrientation));
+			outQuaternion.multiply(DeviceOrientationTracker.WORKING_QUATERNION.setFromAxisAngle(DeviceOrientationTracker.Z_AXIS, -this._windowOrientation * DeviceOrientationTracker.DEG_TO_RAD));
 			return true;
 		}
 	}]);

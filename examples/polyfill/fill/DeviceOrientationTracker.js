@@ -38,7 +38,7 @@ export default class DeviceOrientationTracker extends EventHandlerBase {
 		)
 		outQuaternion.setFromEuler(DeviceOrientationTracker.WORKING_EULER)
 		outQuaternion.multiply(DeviceOrientationTracker.HALF_PI_AROUND_X)
-		outQuaternion.multiply(DeviceOrientationTracker.WORKING_QUATERNION.setFromAxisAngle(DeviceOrientationTracker.Z_AXIS, -this._windowOrientation))
+		outQuaternion.multiply(DeviceOrientationTracker.WORKING_QUATERNION.setFromAxisAngle(DeviceOrientationTracker.Z_AXIS, -this._windowOrientation * DeviceOrientationTracker.DEG_TO_RAD))
 		return true
 	}
 }
