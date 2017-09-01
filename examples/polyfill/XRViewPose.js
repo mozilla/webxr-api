@@ -18,6 +18,16 @@ export default class XRViewPose {
 		}
 	}
 
+	get _position(){
+		return [this._poseModelMatrix[12], this._poseModelMatrix[13], this._poseModelMatrix[14]]
+	}
+
+	set _position(array3){
+		this._poseModelMatrix[12] = array3[0]
+		this._poseModelMatrix[13] = array3[1]
+		this._poseModelMatrix[14] = array3[2]
+	}
+
 	getViewMatrix(view, out=null){
 		if(out === null){
 			out = new Float32Array(16)
@@ -26,3 +36,5 @@ export default class XRViewPose {
 		return out
 	}
 }
+
+XRViewPose.DEFAULT_EYE_HEIGHT = 1.65 // meters

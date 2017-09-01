@@ -43,8 +43,8 @@ export default class FlatDisplay extends XRDisplay {
 		if(this._reality._vrDisplay){ // Use ARCore
 			if(this._vrFrameData === null){
 				this._vrFrameData = new VRFrameData()
-    			this._views[0]._depthNear = this._reality._vrDisplay.depthNear
-    			this._views[0]._depthFar = this._reality._vrDisplay.depthFar
+				this._views[0]._depthNear = this._reality._vrDisplay.depthNear
+				this._views[0]._depthFar = this._reality._vrDisplay.depthFar
 				this._deviceOrientation = new THREE.Quaternion()
 				this._devicePosition = new THREE.Vector3()
 				this._deviceScale = new THREE.Vector3(1, 1, 1)
@@ -97,6 +97,7 @@ export default class FlatDisplay extends XRDisplay {
 		this._devicePosition.set(...this._vrFrameData.pose.position)
 		this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale)
 		this._headPose._setPoseModelMatrix(this._deviceWorldMatrix.toArray())
+		this._eyeLevelPose.position = this._devicePosition.toArray()
 	}
 
 	_updateFromDeviceOrientationTracker(){
@@ -108,19 +109,20 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_handleARKitUpdate(...params){
-        const cameraTransformMatrix = this._arKitWrapper.getData('camera_transform')
-        if (cameraTransformMatrix) {
-            this._headPose._setPoseModelMatrix(cameraTransformMatrix)
-        } else {
+		const cameraTransformMatrix = this._arKitWrapper.getData('camera_transform')
+		if (cameraTransformMatrix) {
+			this._headPose._setPoseModelMatrix(cameraTransformMatrix)
+			this._eyeLevelPose._position = this._headPose._position
+		} else {
 			console.log('no camera transform', this._arKitWrapper.rawARData)
-        }
+		}
 
-        const cameraProjectionMatrix = this._arKitWrapper.getData('projection_camera')
-        if(cameraProjectionMatrix){
+		const cameraProjectionMatrix = this._arKitWrapper.getData('projection_camera')
+		if(cameraProjectionMatrix){
 			this._views[0].setProjectionMatrix(cameraProjectionMatrix)
-        } else {
-        	console.log('no projection camera', this._arKitWrapper.rawARData)
-        }
+		} else {
+			console.log('no projection camera', this._arKitWrapper.rawARData)
+		}
 	}
 
 	_handleARKitInit(ev){

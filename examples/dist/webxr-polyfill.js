@@ -507,7 +507,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 /*
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
 
-This doesn't yet support geospatial
+This doesn't yet support a geospatial coordinate system
 */
 var XRDisplay = function (_EventHandlerBase) {
 	_inherits(XRDisplay, _EventHandlerBase);
@@ -526,9 +526,9 @@ var XRDisplay = function (_EventHandlerBase) {
 		_this._eyeLevelCoordinateSystem = new XRCoordinateSystem(_this, XRCoordinateSystem.EYE_LEVEL);
 		_this._stageCoordinateSystem = new XRCoordinateSystem(_this, XRCoordinateSystem.STAGE);
 
-		_this._headPose = new XRViewPose([0, 1.65, 0]);
-		_this._eyeLevelPose = new XRViewPose([0, 1.65, 0]);
-		_this._stagePose = new XRViewPose();
+		_this._headPose = new XRViewPose([0, 0, 0]);
+		_this._eyeLevelPose = new XRViewPose([0, 0, 0]);
+		_this._stagePose = new XRViewPose([0, -XRViewPose.DEFAULT_EYE_HEIGHT, 0]);
 
 		_this._fov = new _XRFieldOfView2.default(60, 60, 60, 60);
 		_this._depthNear = 0.1;
@@ -2588,12 +2588,25 @@ var XRViewPose = function () {
 		get: function get() {
 			return this._poseModelMatrix;
 		}
+	}, {
+		key: '_position',
+		get: function get() {
+			return [this._poseModelMatrix[12], this._poseModelMatrix[13], this._poseModelMatrix[14]];
+		},
+		set: function set(array3) {
+			this._poseModelMatrix[12] = array3[0];
+			this._poseModelMatrix[13] = array3[1];
+			this._poseModelMatrix[14] = array3[2];
+		}
 	}]);
 
 	return XRViewPose;
 }();
 
 exports.default = XRViewPose;
+
+
+XRViewPose.DEFAULT_EYE_HEIGHT = 1.65; // meters
 
 /***/ }),
 /* 24 */
@@ -2857,6 +2870,7 @@ var FlatDisplay = function (_XRDisplay) {
 			(_devicePosition = this._devicePosition).set.apply(_devicePosition, _toConsumableArray(this._vrFrameData.pose.position));
 			this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale);
 			this._headPose._setPoseModelMatrix(this._deviceWorldMatrix.toArray());
+			this._eyeLevelPose.position = this._devicePosition.toArray();
 		}
 	}, {
 		key: '_updateFromDeviceOrientationTracker',
@@ -2873,6 +2887,7 @@ var FlatDisplay = function (_XRDisplay) {
 			var cameraTransformMatrix = this._arKitWrapper.getData('camera_transform');
 			if (cameraTransformMatrix) {
 				this._headPose._setPoseModelMatrix(cameraTransformMatrix);
+				this._eyeLevelPose._position = this._headPose._position;
 			} else {
 				console.log('no camera transform', this._arKitWrapper.rawARData);
 			}

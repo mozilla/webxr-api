@@ -22,10 +22,12 @@ class XRExampleBase {
 
 		// Create a simple THREE test scene for the layer
 		this.scene = new THREE.Scene()
+		this.rootGroup = new THREE.Group()
+		this.scene.add(this.rootGroup)
 		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000)
 		this.renderer = null // Set in this.handleNewSession
 
-		this.initializeScene(this.scene)
+		this.initializeScene(this.rootGroup)
 
 		if(typeof navigator.XR === 'undefined'){
 			this.showMessage('No WebXR API found')
@@ -139,20 +141,29 @@ class XRExampleBase {
 
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
-		let coordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
-		if(coordinateSystem === null){
+		let sceneCoordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
+		if(sceneCoordinateSystem === null){
 			this.showMessage('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
 			this.session.endSession()
 			// Production apps could render a 'waiting' message and keep checking for an acceptable coordinate system
 			return
 		}
-		let pose = frame.getViewPose(coordinateSystem)
-		this.updateScene(frame, coordinateSystem, pose)
+		let scenePose = frame.getViewPose(sceneCoordinateSystem)
+		let headPose = frame.getViewPose(frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL))
+
+		this.updateScene(frame, sceneCoordinateSystem, scenePose)
+
+		this.rootGroup.matrixAutoUpdate = false
+		this.rootGroup.matrix.fromArray(scenePose.poseModelMatrix)
+		this.rootGroup.matrix.elements[12] -= headPose.poseModelMatrix[12]
+		this.rootGroup.matrix.elements[13] -= headPose.poseModelMatrix[13]
+		this.rootGroup.matrix.elements[14] -= headPose.poseModelMatrix[14]
+		this.rootGroup.updateMatrixWorld(true)
 
 		this.renderer.resetGLState()
-		this.renderer.autoClear = false
 		this.scene.matrixAutoUpdate = false
+		this.renderer.autoClear = false
 		this.renderer.setSize(this.session.baseLayer.framebufferWidth, this.session.baseLayer.framebufferHeight)
 		//this.renderer.clear()
 
@@ -160,12 +171,14 @@ class XRExampleBase {
 
 		// Render each view into this.session.baseLayer.context
 		for(const view of frame.views){
-			const viewport = view.getViewport(this.session.baseLayer)
-			//throttledConsoleLog('pose', pose._poseModelMatrix, viewport)
-			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
+			//throttledConsoleLog('pose', ...headPose._position)
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)
-			this.scene.matrix.fromArray(pose.getViewMatrix(view))
+
+			this.scene.matrix.fromArray(headPose.getViewMatrix(view))
 			this.scene.updateMatrixWorld(true)
+
+			const viewport = view.getViewport(this.session.baseLayer)
+			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.renderer.render(this.scene, this.camera)
 		}
 	}
@@ -199,7 +212,6 @@ function fillInDirectionalScene(scene){
 
 	loadObj('./models/', 'Axis.obj').then(node => {
 		scene.add(node)
-		console.log('added', node, scene)
 	}).catch((...params) =>{
 		console.error('could not load axis', ...params)
 	})
