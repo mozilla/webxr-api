@@ -21,6 +21,7 @@ import XRWebGLLayer from './XRWebGLLayer.js'
 
 import EventHandlerBase from './fill/EventHandlerBase.js'
 import FlatDisplay from './display/FlatDisplay.js'
+
 import CameraReality from './reality/CameraReality.js'
 
 /*
@@ -60,6 +61,25 @@ class XRPolyfill extends EventHandlerBase {
 
 		// Eventually RiftDisplay, ViveDisplay, DaydreamDisplay, GearVRDisplay, CardboardDisplay...
 		this._displays = [new FlatDisplay(this, this._sharedRealities[0])]
+
+		// These elements are at the beginning of the body and absolutely positioned to fill the entire window
+		// Sessions and realities add their elements to these divs so that they are in the right render order
+		this._sessionEls = document.createElement('div')
+		this._sessionEls.setAttribute('class', 'webxr-sessions')
+		this._realityEls = document.createElement('div')
+		this._realityEls.setAttribute('class', 'webxr-realities')
+		for(let el of [this._sessionEls, this._realityEls]){
+			el.style.position = 'absolute'
+			el.style.width = '100%'
+			el.style.height = '100%'
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			document.body.style.width = '100%'
+			document.body.style.height = '100%'
+			document.body.prepend(this._sessionEls)
+			document.body.prepend(this._realityEls) // realities must render behind the sessions
+		})
 	}
 
 	getDisplays(){

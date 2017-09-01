@@ -4,7 +4,7 @@ import XRFieldOfView from './XRFieldOfView.js'
 /*
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
 
-This doesn't yet support geospatial
+This doesn't yet support a geospatial coordinate system
 */
 export default class XRDisplay extends EventHandlerBase {
 	constructor(xr, displayName, isExternal, reality){
@@ -18,9 +18,9 @@ export default class XRDisplay extends EventHandlerBase {
 		this._eyeLevelCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.EYE_LEVEL)
 		this._stageCoordinateSystem = new XRCoordinateSystem(this, XRCoordinateSystem.STAGE)
 
-		this._headPose = new XRViewPose([0, 1.65, 0])
-		this._eyeLevelPose = new XRViewPose([0, 1.65, 0])
-		this._stagePose = new XRViewPose()
+		this._headPose = new XRViewPose([0, 0, 0])
+		this._eyeLevelPose = new XRViewPose([0, 0, 0])
+		this._stagePose = new XRViewPose([0, -XRViewPose.DEFAULT_EYE_HEIGHT, 0])
 
 		var fov = 58/2;
 		this._fov = new XRFieldOfView(fov, fov, fov, fov)
@@ -59,6 +59,11 @@ export default class XRDisplay extends EventHandlerBase {
 	_supportedCreationParameters(parameters){
 		throw 'Should be implemented by extending class'
 	}
+
+	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){}
 
 	//attribute EventHandler ondeactivate;
 }

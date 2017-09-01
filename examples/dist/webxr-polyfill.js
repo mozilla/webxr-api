@@ -507,7 +507,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 /*
 Each XRDisplay represents a method of using a specific type of hardware to render AR or VR realities and layers.
 
-This doesn't yet support geospatial
+This doesn't yet support a geospatial coordinate system
 */
 var XRDisplay = function (_EventHandlerBase) {
 	_inherits(XRDisplay, _EventHandlerBase);
@@ -526,9 +526,9 @@ var XRDisplay = function (_EventHandlerBase) {
 		_this._eyeLevelCoordinateSystem = new XRCoordinateSystem(_this, XRCoordinateSystem.EYE_LEVEL);
 		_this._stageCoordinateSystem = new XRCoordinateSystem(_this, XRCoordinateSystem.STAGE);
 
-		_this._headPose = new XRViewPose([0, 1.65, 0]);
-		_this._eyeLevelPose = new XRViewPose([0, 1.65, 0]);
-		_this._stagePose = new XRViewPose();
+		_this._headPose = new XRViewPose([0, 0, 0]);
+		_this._eyeLevelPose = new XRViewPose([0, 0, 0]);
+		_this._stagePose = new XRViewPose([0, -XRViewPose.DEFAULT_EYE_HEIGHT, 0]);
 
 		var fov = 58 / 2;
 		_this._fov = new _XRFieldOfView2.default(fov, fov, fov, fov);
@@ -573,6 +573,14 @@ var XRDisplay = function (_EventHandlerBase) {
 		value: function _supportedCreationParameters(parameters) {
 			throw 'Should be implemented by extending class';
 		}
+
+		/*
+  Called by a session before it hands a new XRPresentationFrame to the app
+  */
+
+	}, {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {}
 
 		//attribute EventHandler ondeactivate;
 
@@ -636,11 +644,6 @@ var XRSession = function (_EventHandlerBase) {
 
 		_this._baseLayer = null;
 		_this._stageBounds = null;
-
-		_this._el = document.createElement('div');
-		_this._el.style.position = 'absolute';
-		_this._el.style.width = '100%';
-		_this._el.style.width = '100vh';
 		return _this;
 	}
 
@@ -668,6 +671,8 @@ var XRSession = function (_EventHandlerBase) {
 			}
 			// TODO If ARKit is present, switch to using the ARKit watch callback
 			return window.requestAnimationFrame(function () {
+				_this3._display._reality._handleNewFrame();
+				_this3._display._handleNewFrame();
 				callback(_this3._createPresentationFrame());
 			});
 		}
@@ -770,15 +775,14 @@ var XRSession = function (_EventHandlerBase) {
 			return this._baseLayer;
 		},
 		set: function set(value) {
-			console.log('Base layer', value);
+			if (this._baseLayer !== null) {
+				this._xr._sessionEls.removeChild(this._baseLayer._context.canvas);
+			}
 			this._baseLayer = value;
-			if (this._baseLayer === null) {
-				this._el.innerHTML = '';
-			} else {
-				this._baseLayer._context.canvas.style.width = '100%';
-				this._baseLayer._context.canvas.style.height = '100vh';
-				this._el.appendChild(this._baseLayer._context.canvas);
-				document.body.prepend(this._baseLayer._context.canvas);
+			if (this._baseLayer !== null) {
+				this._baseLayer._context.canvas.width = window.innerWidth;
+				this._baseLayer._context.canvas.height = window.innerHeight;
+				this._xr._sessionEls.appendChild(this._baseLayer._context.canvas);
 			}
 		}
 	}, {
@@ -856,6 +860,7 @@ var Reality = function (_EventHandlerBase) {
 
 		var _this = _possibleConstructorReturn(this, (Reality.__proto__ || Object.getPrototypeOf(Reality)).call(this));
 
+		_this._xr = xr;
 		_this._name = name;
 		_this._isShared = isShared;
 		_this._isPassthrough = isPassthrough;
@@ -889,6 +894,14 @@ var Reality = function (_EventHandlerBase) {
 		value: function _stop() {
 			throw 'Exending classes should implement _stop';
 		}
+
+		/*
+  Called by a session before it hands a new XRPresentationFrame to the app
+  */
+
+	}, {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {}
 
 		/*
   Create an anchor hung in space
@@ -1793,6 +1806,27 @@ var XRPolyfill = function (_EventHandlerBase) {
 
 		// Eventually RiftDisplay, ViveDisplay, DaydreamDisplay, GearVRDisplay, CardboardDisplay...
 		_this._displays = [new _FlatDisplay2.default(_this, _this._sharedRealities[0])];
+
+		// These elements are at the beginning of the body and absolutely positioned to fill the entire window
+		// Sessions and realities add their elements to these divs so that they are in the right render order
+		_this._sessionEls = document.createElement('div');
+		_this._sessionEls.setAttribute('class', 'webxr-sessions');
+		_this._realityEls = document.createElement('div');
+		_this._realityEls.setAttribute('class', 'webxr-realities');
+		var _arr = [_this._sessionEls, _this._realityEls];
+		for (var _i = 0; _i < _arr.length; _i++) {
+			var el = _arr[_i];
+			el.style.position = 'absolute';
+			el.style.width = '100%';
+			el.style.height = '100%';
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			document.body.style.width = '100%';
+			document.body.style.height = '100%';
+			document.body.prepend(_this._sessionEls);
+			document.body.prepend(_this._realityEls); // realities must render behind the sessions
+		});
 		return _this;
 	}
 
@@ -2555,12 +2589,25 @@ var XRViewPose = function () {
 		get: function get() {
 			return this._poseModelMatrix;
 		}
+	}, {
+		key: '_position',
+		get: function get() {
+			return [this._poseModelMatrix[12], this._poseModelMatrix[13], this._poseModelMatrix[14]];
+		},
+		set: function set(array3) {
+			this._poseModelMatrix[12] = array3[0];
+			this._poseModelMatrix[13] = array3[1];
+			this._poseModelMatrix[14] = array3[2];
+		}
 	}]);
 
 	return XRViewPose;
 }();
 
 exports.default = XRViewPose;
+
+
+XRViewPose.DEFAULT_EYE_HEIGHT = 1.65; // meters
 
 /***/ }),
 /* 24 */
@@ -2706,6 +2753,8 @@ var _ARKitWrapper2 = _interopRequireDefault(_ARKitWrapper);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2716,8 +2765,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 FlatDisplay takes over a handset's full screen and presents a moving view into a Reality, as if it were a magic window.
 
 If ARKit is present, it uses the ARKit updates to set the headModel pose.
-
-TODO if ARKit is not present, use orientation events.
+If ARCore is available on the VRDisplays, use that to pose the headModel. (TODO)
+Otherwise, use orientation events.
 */
 var FlatDisplay = function (_XRDisplay) {
 	_inherits(FlatDisplay, _XRDisplay);
@@ -2731,10 +2780,15 @@ var FlatDisplay = function (_XRDisplay) {
 		_this._initialized = false;
 
 		// This is used if we have ARKit support
-		_this._arKitWrapper = null; // ARKitWrapper
+		_this._arKitWrapper = null;
 
-		// These are used if we don't have ARKit support and instead use window orientation events
-		_this._deviceOrientationTracker = null; // DeviceOrientationTracker
+		// This is used if we have ARCore support
+		_this._vrFrameData = null;
+
+		// This is used if we are using orientation events
+		_this._deviceOrientationTracker = null;
+
+		// These are used if we have ARCore support or use window orientation events
 		_this._deviceOrientation = null; // THREE.Quaternion
 		_this._devicePosition = null; // THREE.Vector3
 		_this._deviceScale = null; // THREE.Vector3
@@ -2750,7 +2804,19 @@ var FlatDisplay = function (_XRDisplay) {
 		value: function _start() {
 			var _this2 = this;
 
-			if (_ARKitWrapper2.default.HasARKit()) {
+			if (this._reality._vrDisplay) {
+				// Use ARCore
+				if (this._vrFrameData === null) {
+					this._vrFrameData = new VRFrameData();
+					this._views[0]._depthNear = this._reality._vrDisplay.depthNear;
+					this._views[0]._depthFar = this._reality._vrDisplay.depthFar;
+					this._deviceOrientation = new THREE.Quaternion();
+					this._devicePosition = new THREE.Vector3();
+					this._deviceScale = new THREE.Vector3(1, 1, 1);
+					this._deviceWorldMatrix = new THREE.Matrix4();
+				}
+			} else if (_ARKitWrapper2.default.HasARKit()) {
+				// Use ARKit
 				if (this._initialized === false) {
 					this._initialized = true;
 					this._arKitWrapper = _ARKitWrapper2.default.GetOrCreate();
@@ -2763,6 +2829,7 @@ var FlatDisplay = function (_XRDisplay) {
 					this._arKitWrapper.watch();
 				}
 			} else {
+				// Use device orientation
 				if (this._initialized === false) {
 					this._initialized = true;
 					this._deviceOrientation = new THREE.Quaternion();
@@ -2778,8 +2845,33 @@ var FlatDisplay = function (_XRDisplay) {
 		}
 	}, {
 		key: '_stop',
-		value: function _stop() {
-			// TODO figure out how to stop ARKit so CameraReality can still work
+		value: function _stop() {}
+		// TODO figure out how to stop ARKit and ARCore so that CameraReality can still work
+
+
+		/*
+  Called by a session before it hands a new XRPresentationFrame to the app
+  */
+
+	}, {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {
+			if (this._vrFrameData !== null) {
+				this._updateFromVRDevice();
+			}
+		}
+	}, {
+		key: '_updateFromVRDevice',
+		value: function _updateFromVRDevice() {
+			var _deviceOrientation, _devicePosition;
+
+			this._reality._vrDisplay.getFrameData(this._vrFrameData);
+			this._views[0].setProjectionMatrix(this._vrFrameData.leftProjectionMatrix);
+			(_deviceOrientation = this._deviceOrientation).set.apply(_deviceOrientation, _toConsumableArray(this._vrFrameData.pose.orientation));
+			(_devicePosition = this._devicePosition).set.apply(_devicePosition, _toConsumableArray(this._vrFrameData.pose.position));
+			this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale);
+			this._headPose._setPoseModelMatrix(this._deviceWorldMatrix.toArray());
+			this._eyeLevelPose.position = this._devicePosition.toArray();
 		}
 	}, {
 		key: '_updateFromDeviceOrientationTracker',
@@ -2796,6 +2888,7 @@ var FlatDisplay = function (_XRDisplay) {
 			var cameraTransformMatrix = this._arKitWrapper.getData('camera_transform');
 			if (cameraTransformMatrix) {
 				this._headPose._setPoseModelMatrix(cameraTransformMatrix);
+				this._eyeLevelPose._position = this._headPose._position;
 			} else {
 				console.log('no camera transform', this._arKitWrapper.rawARData);
 			}
@@ -2952,6 +3045,10 @@ var _ARKitWrapper = __webpack_require__(10);
 
 var _ARKitWrapper2 = _interopRequireDefault(_ARKitWrapper);
 
+var _ARCoreCameraRenderer = __webpack_require__(28);
+
+var _ARCoreCameraRenderer2 = _interopRequireDefault(_ARCoreCameraRenderer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2983,11 +3080,79 @@ var CameraReality = function (_Reality) {
 
 		// These are used if we do not have access to ARKit
 		_this._mediaStream = null;
-		_this._el = null;
+		_this._videoEl = null;
+
+		// These are used if we're using the Google ARCore web app
+		_this._arCoreCameraRenderer = null;
+		_this._arCoreCanvas = null;
+		_this._elContext = null;
+		_this._vrDisplay = null;
+		_this._vrFrameData = null;
+
+		if (typeof navigator.getVRDisplays === 'function') {
+			navigator.getVRDisplays().then(function (displays) {
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = displays[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var display = _step.value;
+
+						if (display === null) continue;
+						if (display.capabilities.hasPassThroughCamera) {
+							_this._vrDisplay = display;
+							_this._vrFrameData = new VRFrameData();
+							_this._arCoreCanvas = document.createElement('canvas');
+							_this._xr._realityEls.appendChild(_this._arCoreCanvas);
+							_this._arCoreCanvas.width = window.innerWidth;
+							_this._arCoreCanvas.height = window.innerHeight;
+							_this._elContext = _this._arCoreCanvas.getContext('webgl');
+							if (_this._elContext === null) {
+								throw 'Could not create CameraReality GL context';
+							}
+							window.addEventListener('resize', function () {
+								_this._arCoreCanvas.width = window.innerWidth;
+								_this._arCoreCanvas.height = window.innerHeight;
+							}, false);
+							break;
+						} else {
+							console.log('Found a non-pass-through camera VR display', display);
+						}
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
+			});
+		}
 		return _this;
 	}
 
+	/*
+ Called by a session before it hands a new XRPresentationFrame to the app
+ */
+
+
 	_createClass(CameraReality, [{
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {
+			if (this._arCoreCameraRenderer) {
+				this._arCoreCameraRenderer.render();
+				this._vrDisplay.getFrameData(this._vrFrameData);
+			}
+		}
+	}, {
 		key: '_start',
 		value: function _start() {
 			var _this2 = this;
@@ -2995,7 +3160,12 @@ var CameraReality = function (_Reality) {
 			if (this._running) return;
 			this._running = true;
 
-			if (_ARKitWrapper2.default.HasARKit()) {
+			if (this._vrDisplay !== null) {
+				// Using ARCore
+				this._arCoreCameraRenderer = new _ARCoreCameraRenderer2.default(this._vrDisplay, this._elContext);
+				this._initialized = true;
+			} else if (_ARKitWrapper2.default.HasARKit()) {
+				// Using ARKit
 				if (this._initialized === false) {
 					this._initialized = true;
 					this._arKitWrapper = _ARKitWrapper2.default.GetOrCreate();
@@ -3007,29 +3177,28 @@ var CameraReality = function (_Reality) {
 					this._arKitWrapper.watch();
 				}
 			} else {
+				// Using WebRTC
 				if (this._initialized === false) {
 					this._initialized = true;
 					navigator.mediaDevices.getUserMedia({
 						audio: false,
 						video: { facingMode: "environment" }
 					}).then(function (stream) {
-						_this2._el = document.createElement('video');
-						_this2._el.setAttribute('class', 'camera-reality-video');
-						_this2._el.setAttribute('playsinline', true);
-						_this2._el.style.position = 'absolute';
-						_this2._el.style.width = '100%';
-						_this2._el.style.height = '100vh';
-						_this2._el.srcObject = stream;
-						document.body.prepend(_this2._el);
-						_this2._el.play();
+						_this2._videoEl = document.createElement('video');
+						_this2._xr._realityEls.appendChild(_this2._videoEl);
+						_this2._videoEl.setAttribute('class', 'camera-reality-video');
+						_this2._videoEl.setAttribute('playsinline', true);
+						_this2._videoEl.style.width = '100%';
+						_this2._videoEl.style.height = '100%';
+						_this2._videoEl.srcObject = stream;
+						_this2._videoEl.play();
 					}).catch(function (err) {
 						console.error('Could not set up video stream', err);
 						_this2._initialized = false;
 						_this2._running = false;
 					});
 				} else {
-					document.body.prepend(this._el);
-					this._el.play();
+					this._videoEl.play();
 				}
 			}
 		}
@@ -3041,12 +3210,8 @@ var CameraReality = function (_Reality) {
 					return;
 				}
 				this._arKitWrapper.stop();
-			} else {
-				if (this._el === null) {
-					return;
-				}
-				document.body.removeChild(this._el);
-				this._el.pause();
+			} else if (this._videoEl !== null) {
+				this._videoEl.pause();
 			}
 		}
 	}, {
@@ -3059,7 +3224,7 @@ var CameraReality = function (_Reality) {
 		value: function _addAnchor(anchor) {
 			console.log('reality adding anchor', anchor);
 
-			// TODO talk to ARKit to create an anchor
+			// TODO talk to ARKit or ARCore to create an anchor
 
 			this._anchors.set(anchor.uid, anchor);
 			return anchor.uid;
@@ -3089,6 +3254,334 @@ var CameraReality = function (_Reality) {
 }(_Reality3.default);
 
 exports.default = CameraReality;
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/*
+ * Copyright 2017 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the 'License')
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var fragmentSource = '#extension GL_OES_EGL_image_external : require\n\nprecision mediump float;\n\nvarying vec2 vTextureCoord;\n\nuniform samplerExternalOES uSampler;\n\nvoid main(void) {\n  gl_FragColor = texture2D(uSampler, vTextureCoord);\n}';
+
+var vertexSource = 'attribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void) {\n  gl_Position = vec4(aVertexPosition, 1.0);\n  vTextureCoord = aTextureCoord;\n}';
+
+/**
+ * Creates and load a shader from a string, type specifies either 'vertex' or 'fragment'
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {string} str
+ * @param {string} type
+ * @return {!WebGLShader}
+ */
+function getShader(gl, str, type) {
+	if (type == 'fragment') {
+		var shader = gl.createShader(gl.FRAGMENT_SHADER);
+	} else if (type == 'vertex') {
+		var shader = gl.createShader(gl.VERTEX_SHADER);
+	} else {
+		return null;
+	}
+
+	gl.shaderSource(shader, str);
+	gl.compileShader(shader);
+
+	var result = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+	if (!result) {
+		console.error(gl.getShaderInfoLog(shader));
+		return null;
+	}
+
+	return shader;
+}
+
+/**
+ * Creates a shader program from vertex and fragment shader sources
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {string} vs
+ * @param {string} fs
+ * @return {!WebGLProgram}
+ */
+function getProgram(gl, vs, fs) {
+	var vertexShader = getShader(gl, vs, 'vertex');
+	var fragmentShader = getShader(gl, fs, 'fragment');
+	if (!fragmentShader) {
+		return null;
+	}
+
+	var shaderProgram = gl.createProgram();
+	gl.attachShader(shaderProgram, vertexShader);
+	gl.attachShader(shaderProgram, fragmentShader);
+	gl.linkProgram(shaderProgram);
+
+	var result = gl.getProgramParameter(shaderProgram, gl.LINK_STATUS);
+	if (!result) {
+		console.error('Could not initialise arview shaders');
+	}
+
+	return shaderProgram;
+}
+
+/**
+ * Calculate the correct orientation depending on the device and the camera
+ * orientations.
+ *
+ * @param {number} screenOrientation
+ * @param {number} seeThroughCameraOrientation
+ * @return {number}
+ */
+function combineOrientations(screenOrientation, seeThroughCameraOrientation) {
+	var seeThroughCameraOrientationIndex = 0;
+	switch (seeThroughCameraOrientation) {
+		case 90:
+			seeThroughCameraOrientationIndex = 1;
+			break;
+		case 180:
+			seeThroughCameraOrientationIndex = 2;
+			break;
+		case 270:
+			seeThroughCameraOrientationIndex = 3;
+			break;
+		default:
+			seeThroughCameraOrientationIndex = 0;
+			break;
+	}
+	var screenOrientationIndex = 0;
+	switch (screenOrientation) {
+		case 90:
+			screenOrientationIndex = 1;
+			break;
+		case 180:
+			screenOrientationIndex = 2;
+			break;
+		case 270:
+			screenOrientationIndex = 3;
+			break;
+		default:
+			screenOrientationIndex = 0;
+			break;
+	}
+	var ret = screenOrientationIndex - seeThroughCameraOrientationIndex;
+	if (ret < 0) {
+		ret += 4;
+	}
+	return ret % 4;
+}
+
+/**
+ * Renders the ar camera's video texture
+ */
+
+var ARVideoRenderer = function () {
+	/**
+  * @param {VRDisplay} vrDisplay
+  * @param {WebGLRenderingContext} gl
+  */
+	function ARVideoRenderer(vrDisplay, gl) {
+		_classCallCheck(this, ARVideoRenderer);
+
+		this.vrDisplay = vrDisplay;
+		this.gl = gl;
+		this.passThroughCamera = vrDisplay.getPassThroughCamera();
+		this.program = getProgram(gl, vertexSource, fragmentSource);
+
+		gl.useProgram(this.program);
+
+		// Setup a quad
+		this.vertexPositionAttribute = gl.getAttribLocation(this.program, 'aVertexPosition');
+		this.textureCoordAttribute = gl.getAttribLocation(this.program, 'aTextureCoord');
+
+		this.samplerUniform = gl.getUniformLocation(this.program, 'uSampler');
+
+		this.vertexPositionBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
+		var vertices = [-1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0];
+		var f32Vertices = new Float32Array(vertices);
+		gl.bufferData(gl.ARRAY_BUFFER, f32Vertices, gl.STATIC_DRAW);
+		this.vertexPositionBuffer.itemSize = 3;
+		this.vertexPositionBuffer.numItems = 12;
+
+		this.textureCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
+		// Precalculate different texture UV coordinates depending on the possible
+		// orientations of the device depending if there is a VRDisplay or not
+		var textureCoords = null;
+		if (this.vrDisplay) {
+			var u = this.passThroughCamera.width / this.passThroughCamera.textureWidth;
+			var v = this.passThroughCamera.height / this.passThroughCamera.textureHeight;
+			textureCoords = [[0.0, 0.0, 0.0, v, u, 0.0, u, v], [u, 0.0, 0.0, 0.0, u, v, 0.0, v], [u, v, u, 0.0, 0.0, v, 0.0, 0.0], [0.0, v, u, v, 0.0, 0.0, u, 0.0]];
+		} else {
+			textureCoords = [[0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0], [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0], [1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], [0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0]];
+		}
+
+		this.f32TextureCoords = [];
+		for (var i = 0; i < textureCoords.length; i++) {
+			this.f32TextureCoords.push(new Float32Array(textureCoords[i]));
+		}
+		// Store the current combined orientation to check if it has changed
+		// during the update calls and use the correct texture coordinates.
+		this.combinedOrientation = combineOrientations(screen.orientation.angle, this.passThroughCamera.orientation);
+
+		gl.bufferData(gl.ARRAY_BUFFER, this.f32TextureCoords[this.combinedOrientation], gl.STATIC_DRAW);
+		this.textureCoordBuffer.itemSize = 2;
+		this.textureCoordBuffer.numItems = 8;
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+		this.indexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+		var indices = [0, 1, 2, 2, 1, 3];
+		var ui16Indices = new Uint16Array(indices);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, ui16Indices, gl.STATIC_DRAW);
+		this.indexBuffer.itemSize = 1;
+		this.indexBuffer.numItems = 6;
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+		this.texture = gl.createTexture();
+		gl.useProgram(null);
+
+		// The projection matrix will be based on an identify orthographic camera
+		this.projectionMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+		this.mvMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+		return this;
+	}
+
+	/**
+  * Renders the quad
+  */
+
+
+	_createClass(ARVideoRenderer, [{
+		key: 'render',
+		value: function render() {
+			var gl = this.gl;
+			gl.useProgram(this.program);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
+			gl.enableVertexAttribArray(this.vertexPositionAttribute);
+			gl.vertexAttribPointer(this.vertexPositionAttribute, this.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
+
+			// Check the current orientation of the device combined with the
+			// orientation of the VRSeeThroughCamera to determine the correct UV
+			// coordinates to be used.
+			var combinedOrientation = combineOrientations(screen.orientation.angle, this.passThroughCamera.orientation);
+			if (combinedOrientation !== this.combinedOrientation) {
+				this.combinedOrientation = combinedOrientation;
+				gl.bufferData(gl.ARRAY_BUFFER, this.f32TextureCoords[this.combinedOrientation], gl.STATIC_DRAW);
+			}
+			gl.enableVertexAttribArray(this.textureCoordAttribute);
+			gl.vertexAttribPointer(this.textureCoordAttribute, this.textureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_EXTERNAL_OES, this.texture);
+			// Update the content of the texture in every frame.
+			gl.texImage2D(gl.TEXTURE_EXTERNAL_OES, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.passThroughCamera);
+			gl.uniform1i(this.samplerUniform, 0);
+
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+
+			gl.drawElements(gl.TRIANGLES, this.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+			// Disable enabled states to allow other render calls to correctly work
+			gl.bindTexture(gl.TEXTURE_EXTERNAL_OES, null);
+			gl.disableVertexAttribArray(this.vertexPositionAttribute);
+			gl.disableVertexAttribArray(this.textureCoordAttribute);
+			gl.bindBuffer(gl.ARRAY_BUFFER, null);
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+			gl.useProgram(null);
+		}
+	}]);
+
+	return ARVideoRenderer;
+}();
+
+/**
+ * A helper class that takes a VRDisplay with AR capabilities
+ * and renders the see through camera to the passed in WebGL context.
+ */
+
+
+var ARCoreCameraRenderer = function () {
+	function ARCoreCameraRenderer(vrDisplay, gl) {
+		_classCallCheck(this, ARCoreCameraRenderer);
+
+		this.vrDisplay = vrDisplay;
+		this.gl = gl;
+
+		this.videoRenderer = new ARVideoRenderer(vrDisplay, this.gl);
+
+		// Cache the width/height so we're not potentially forcing
+		// a reflow if there's been a style invalidation
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
+		window.addEventListener('resize', this.onWindowResize.bind(this), false);
+	}
+
+	/**
+  * Updates the stored width/height of window on resize.
+  */
+
+
+	_createClass(ARCoreCameraRenderer, [{
+		key: 'onWindowResize',
+		value: function onWindowResize() {
+			this.width = window.innerWidth;
+			this.height = window.innerHeight;
+		}
+
+		/**
+   * Renders the see through camera to the passed in gl context
+   */
+
+	}, {
+		key: 'render',
+		value: function render() {
+			var gl = this.gl;
+			var dpr = 1;
+			var width = this.width * dpr;
+			var height = this.height * dpr;
+
+			if (gl.viewportWidth !== width) {
+				gl.viewportWidth = width;
+			}
+
+			if (gl.viewportHeight !== height) {
+				gl.viewportHeight = height;
+			}
+
+			this.gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+			this.videoRenderer.render();
+		}
+	}]);
+
+	return ARCoreCameraRenderer;
+}();
+
+exports.default = ARCoreCameraRenderer;
 
 /***/ })
 /******/ ]);

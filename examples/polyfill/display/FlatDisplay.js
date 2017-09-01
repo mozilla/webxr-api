@@ -10,8 +10,8 @@ import ARKitWrapper from '../platform/ARKitWrapper.js'
 FlatDisplay takes over a handset's full screen and presents a moving view into a Reality, as if it were a magic window.
 
 If ARKit is present, it uses the ARKit updates to set the headModel pose.
-
-TODO if ARKit is not present, use orientation events.
+If ARCore is available on the VRDisplays, use that to pose the headModel. (TODO)
+Otherwise, use orientation events.
 */
 export default class FlatDisplay extends XRDisplay {
 	constructor(xr, reality){
@@ -21,10 +21,15 @@ export default class FlatDisplay extends XRDisplay {
 		this._initialized = false
 
 		// This is used if we have ARKit support
-		this._arKitWrapper = null // ARKitWrapper
+		this._arKitWrapper = null
 
-		// These are used if we don't have ARKit support and instead use window orientation events
-		this._deviceOrientationTracker = null	// DeviceOrientationTracker
+		// This is used if we have ARCore support
+		this._vrFrameData = null
+
+		// This is used if we are using orientation events
+		this._deviceOrientationTracker = null
+
+		// These are used if we have ARCore support or use window orientation events
 		this._deviceOrientation = null			// THREE.Quaternion
 		this._devicePosition = null				// THREE.Vector3
 		this._deviceScale = null				// THREE.Vector3
@@ -35,7 +40,17 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_start(){
-		if(ARKitWrapper.HasARKit()){
+		if(this._reality._vrDisplay){ // Use ARCore
+			if(this._vrFrameData === null){
+				this._vrFrameData = new VRFrameData()
+				this._views[0]._depthNear = this._reality._vrDisplay.depthNear
+				this._views[0]._depthFar = this._reality._vrDisplay.depthFar
+				this._deviceOrientation = new THREE.Quaternion()
+				this._devicePosition = new THREE.Vector3()
+				this._deviceScale = new THREE.Vector3(1, 1, 1)
+				this._deviceWorldMatrix = new THREE.Matrix4()
+			}
+		} else if(ARKitWrapper.HasARKit()){ // Use ARKit
 			if(this._initialized === false){
 				this._initialized = true
 				this._arKitWrapper = ARKitWrapper.GetOrCreate()
@@ -47,7 +62,7 @@ export default class FlatDisplay extends XRDisplay {
 			} else {
 				this._arKitWrapper.watch()
 			}
-		} else {
+		} else { // Use device orientation
 			if(this._initialized === false){
 				this._initialized = true
 				this._deviceOrientation = new THREE.Quaternion()
@@ -63,7 +78,26 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_stop(){
-		// TODO figure out how to stop ARKit so CameraReality can still work
+		// TODO figure out how to stop ARKit and ARCore so that CameraReality can still work
+	}
+
+	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){
+		if(this._vrFrameData !== null){
+			this._updateFromVRDevice()
+		}
+	}
+
+	_updateFromVRDevice(){
+		this._reality._vrDisplay.getFrameData(this._vrFrameData)
+		this._views[0].setProjectionMatrix(this._vrFrameData.leftProjectionMatrix)
+		this._deviceOrientation.set(...this._vrFrameData.pose.orientation)
+		this._devicePosition.set(...this._vrFrameData.pose.position)
+		this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale)
+		this._headPose._setPoseModelMatrix(this._deviceWorldMatrix.toArray())
+		this._eyeLevelPose.position = this._devicePosition.toArray()
 	}
 
 	_updateFromDeviceOrientationTracker(){
@@ -75,19 +109,20 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_handleARKitUpdate(...params){
-        const cameraTransformMatrix = this._arKitWrapper.getData('camera_transform')
-        if (cameraTransformMatrix) {
-            this._headPose._setPoseModelMatrix(cameraTransformMatrix)
-        } else {
+		const cameraTransformMatrix = this._arKitWrapper.getData('camera_transform')
+		if (cameraTransformMatrix) {
+			this._headPose._setPoseModelMatrix(cameraTransformMatrix)
+			this._eyeLevelPose._position = this._headPose._position
+		} else {
 			console.log('no camera transform', this._arKitWrapper.rawARData)
-        }
+		}
 
-        const cameraProjectionMatrix = this._arKitWrapper.getData('projection_camera')
-        if(cameraProjectionMatrix){
+		const cameraProjectionMatrix = this._arKitWrapper.getData('projection_camera')
+		if(cameraProjectionMatrix){
 			this._views[0].setProjectionMatrix(cameraProjectionMatrix)
-        } else {
-        	console.log('no projection camera', this._arKitWrapper.rawARData)
-        }
+		} else {
+			console.log('no projection camera', this._arKitWrapper.rawARData)
+		}
 	}
 
 	_handleARKitInit(ev){

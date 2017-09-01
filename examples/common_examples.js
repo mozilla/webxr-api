@@ -13,22 +13,26 @@ class XRExampleBase {
 		this.frameOfReferenceTypes = frameOfReferenceTypes
 		this.createVirtualReality = createVirtualReality
 
+		this.hasWebkit = typeof window.webkit !== 'undefined'
+		if(this.hasWebkit) this.setupWebkitUI()
+
 		// Set during the XR.getDisplays call below
 		this.display = null
 		this.session = null
 
 		// Create a simple THREE test scene for the layer
 		this.scene = new THREE.Scene()
+		this.rootGroup = new THREE.Group()
+		this.scene.add(this.rootGroup)
 		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000)
 		this.renderer = null // Set in this.handleNewSession
 
-		this.initializeScene(this.scene)
+		this.initializeScene(this.rootGroup)
 
 		if(typeof navigator.XR === 'undefined'){
 			this.showMessage('No WebXR API found')
 			return
 		}
-
 
 
 		// Get a display and then request a session
@@ -38,7 +42,6 @@ class XRExampleBase {
 				return
 			}
 			this.display = displays[0] // production code would allow the user to choose, this code assumes that this is a FlatDisplay
-
 			this.display.requestSession({
 				exclusive: this.createVirtualReality,
 				type: this.createVirtualReality ? XRSession.REALITY : XRSession.AUGMENTATION
@@ -48,6 +51,8 @@ class XRExampleBase {
 				console.error('Error requesting session', err)
 				this.showMessage('Could not initiate the session')
 			})
+		}).catch(err => {
+			console.error('Could not get XR displays', err)
 		})
 	}
 
@@ -55,7 +60,6 @@ class XRExampleBase {
 		Empties this.el, adds a div with the message text, and shows a button to test rendering the scene to this.el
 	*/
 	showMessage(messageText){
-		this.el.innerHTML = ''
 		let message = document.createElement('div')
 		message.innerHTML = messageText
 		this.el.append(message)
@@ -74,7 +78,9 @@ class XRExampleBase {
 		// Create a canvas and context for the layer
 		let glCanvas = document.createElement('canvas')
 		let glContext = glCanvas.getContext('webgl')
-
+		if(glContext === null){
+			throw 'Could not create GL context'
+		}
 		this.session.baseLayer = new XRWebGLLayer(this.session, glContext)
 
 		// Handle layer focus events
@@ -84,21 +90,22 @@ class XRExampleBase {
 		// Set up the THREE renderer with the session's layer's glContext
 		this.renderer = new THREE.WebGLRenderer({
 			canvas: glCanvas,
-			context: glContext
+			context: glContext,
+			antialias: false,
+			alpha: true
 		})
 		this.renderer.setPixelRatio(1)
+		this.renderer.autoClear = false
 		this.renderer.setClearColor('#000', 0)
 
 		/*
 		This part is a bit bogus and relies on the polyfill only returning a FlatDisplay
 		*/
-		const width = parseInt(window.getComputedStyle(this.el).width)
-		const height = parseInt(window.getComputedStyle(this.el).height)
+		const width = parseInt(window.getComputedStyle(document.body).width)
+		const height = parseInt(window.getComputedStyle(document.body).height)
 		this.camera.aspect = width / height
 		this.camera.updateProjectionMatrix()
 		this.renderer.setSize(width, height)
-		this.renderer.domElement.style.position = 'absolute'
-
 
 		if(this.createVirtualReality){
 			const reality = this.session.createVirtualReality('VR Example', false)
@@ -134,35 +141,80 @@ class XRExampleBase {
 
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
-		let coordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
-		if(coordinateSystem === null){
+		let sceneCoordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
+		if(sceneCoordinateSystem === null){
 			this.showMessage('Could not get a usable coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
 			this.session.endSession()
 			// Production apps could render a 'waiting' message and keep checking for an acceptable coordinate system
 			return
 		}
-		let pose = frame.getViewPose(coordinateSystem)
-		this.updateScene(frame, coordinateSystem, pose)
+		let scenePose = frame.getViewPose(sceneCoordinateSystem)
+		let headPose = frame.getViewPose(frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL))
 
-		this.renderer.autoClear = false
+		this.updateScene(frame, sceneCoordinateSystem, scenePose)
+
+		this.rootGroup.matrixAutoUpdate = false
+		this.rootGroup.matrix.fromArray(scenePose.poseModelMatrix)
+		this.rootGroup.matrix.elements[12] -= headPose.poseModelMatrix[12]
+		this.rootGroup.matrix.elements[13] -= headPose.poseModelMatrix[13]
+		this.rootGroup.matrix.elements[14] -= headPose.poseModelMatrix[14]
+		this.rootGroup.updateMatrixWorld(true)
+
+		this.renderer.resetGLState()
 		this.scene.matrixAutoUpdate = false
+		this.renderer.autoClear = false
 		this.renderer.setSize(this.session.baseLayer.framebufferWidth, this.session.baseLayer.framebufferHeight)
-		this.renderer.clear()
+		//this.renderer.clear()
 
 		//this.session.baseLayer.context.bindFramebuffer(this.session.baseLayer.context.FRAMEBUFFER, this.session.baseLayer.framebuffer)
 
 		// Render each view into this.session.baseLayer.context
 		for(const view of frame.views){
-			const viewport = view.getViewport(this.session.baseLayer)
-			//throttledConsoleLog('pose', pose._poseModelMatrix, viewport)
-			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
+			//throttledConsoleLog('pose', ...headPose._position)
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)
-			this.scene.matrix.fromArray(pose.getViewMatrix(view))
+
+			this.scene.matrix.fromArray(headPose.getViewMatrix(view))
 			this.scene.updateMatrixWorld(true)
+
+			const viewport = view.getViewport(this.session.baseLayer)
+			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.renderer.render(this.scene, this.camera)
 		}
 	}
+
+	setupWebkitUI(){
+		this.webkitControlEl = document.createElement('div')
+		this.el.appendChild(this.webkitControlEl)
+		this.webkitControlEl.setAttribute('class', 'webkit-control')
+		this.locationInput = document.createElement('input')
+		this.locationInput.style.width = '50%'
+		this.locationInput.value = '' + document.location.href
+		this.webkitControlEl.appendChild(this.locationInput)
+		this.locationButton = document.createElement('button')
+		this.locationButton.innerHTML = 'load'
+		this.webkitControlEl.appendChild(this.locationButton)
+
+		this.locationButton.addEventListener('click', ev => {
+			window.webkit.messageHandlers.loadUrl.postMessage({
+	            url: this.locationInput.value
+	        })
+		})
+	}
+}
+
+function fillInDirectionalScene(scene){
+	let ambientLight = new THREE.AmbientLight('#FFF', 1)
+	scene.add(ambientLight)
+
+	let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
+	scene.add(directionalLight)
+
+	loadObj('./models/', 'Axis.obj').then(node => {
+		scene.add(node)
+	}).catch((...params) =>{
+		console.error('could not load axis', ...params)
+	})
 }
 
 function fillInTeapotScene(scene){
@@ -197,6 +249,26 @@ function fillInBoxScene(scene){
 	scene.add(directionalLight)
 
 	return scene
+}
+
+function loadObj(baseURL, geometry){
+	return new Promise(function(resolve, reject){
+		const mtlLoader = new THREE.MTLLoader()
+		mtlLoader.setPath(baseURL)
+		const mtlName = geometry.split('.')[geometry.split(':').length - 1] + '.mtl'
+		mtlLoader.load(mtlName, (materials) => {
+			materials.preload()
+			let objLoader = new THREE.OBJLoader()
+			objLoader.setMaterials(materials)
+			objLoader.setPath(baseURL)
+			objLoader.load(geometry, (obj) => {
+				resolve(obj)
+			}, () => {} , (...params) => {
+				console.error('Failed to load obj', ...params)
+				reject(...params)
+			})
+		})
+	})
 }
 
 /*

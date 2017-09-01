@@ -13,11 +13,6 @@ export default class XRSession extends EventHandlerBase {
 
 		this._baseLayer = null
 		this._stageBounds = null
-
-		this._el = document.createElement('div')
-		this._el.style.position = 'absolute'
-		this._el.style.width = '100%'
-		this._el.style.width = '100vh'
 	}
 
 	get display(){ return this._display }
@@ -28,18 +23,19 @@ export default class XRSession extends EventHandlerBase {
 
 	get reality(){ return this._display._reality }
 
-	get baseLayer(){ return this._baseLayer }
+	get baseLayer(){
+		return this._baseLayer
+	}
 
 	set baseLayer(value){
-		console.log('Base layer', value)
+		if(this._baseLayer !== null){
+			this._xr._sessionEls.removeChild(this._baseLayer._context.canvas)
+		}
 		this._baseLayer = value
-		if(this._baseLayer === null){
-			this._el.innerHTML = ''
-		} else {
-			this._baseLayer._context.canvas.style.width = '100%'
-			this._baseLayer._context.canvas.style.height = '100vh'
-			this._el.appendChild(this._baseLayer._context.canvas)
-			document.body.prepend(this._baseLayer._context.canvas)
+		if(this._baseLayer !== null){
+			this._baseLayer._context.canvas.width = window.innerWidth
+			this._baseLayer._context.canvas.height = window.innerHeight
+			this._xr._sessionEls.appendChild(this._baseLayer._context.canvas)
 		}
 	}
 
@@ -70,6 +66,8 @@ export default class XRSession extends EventHandlerBase {
 		}
 		// TODO If ARKit is present, switch to using the ARKit watch callback
 		return window.requestAnimationFrame(() => {
+			this._display._reality._handleNewFrame()
+			this._display._handleNewFrame()
 			callback(this._createPresentationFrame())
 		})
 	}
