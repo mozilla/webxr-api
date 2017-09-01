@@ -3,20 +3,19 @@
 
 class ARSimplestExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['headModel'], false)
+		super(domElement, ['stage'], false)
 	}
 
 	// Called during construction
 	initializeScene(){
-		fillInTeapotScene(this.scene)
-		this.scene.children[0].rotation.y += 0.5
+		fillInDirectionalScene(this.rootGroup)
 	}
 
 	// Called once per frame
 	updateScene(frame, coordinateSystem, pose){
 		// Spin the cube to show this method is called
-		//this.scene.children[0].rotation.x += 0.005
-		//this.scene.children[0].rotation.y += 0.01
+		//this.rootGroup.children[0].rotation.x += 0.005
+		//this.rootGroup.children[0].rotation.y += 0.01
 	}
 }
 

@@ -6,6 +6,7 @@ A Reality represents a view of the world, be it the real world via sensors or a 
 export default class Reality extends EventHandlerBase {
 	constructor(xr, name, isShared, isPassthrough){
 		super()
+		this._xr = xr
 		this._name = name
 		this._isShared = isShared
 		this._isPassthrough = isPassthrough
@@ -36,6 +37,11 @@ export default class Reality extends EventHandlerBase {
 	_stop(){
 		throw 'Exending classes should implement _stop'
 	}
+
+	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){}
 
 	/*
 	Create an anchor hung in space
