@@ -530,7 +530,8 @@ var XRDisplay = function (_EventHandlerBase) {
 		_this._eyeLevelPose = new XRViewPose([0, 0, 0]);
 		_this._stagePose = new XRViewPose([0, -XRViewPose.DEFAULT_EYE_HEIGHT, 0]);
 
-		_this._fov = new _XRFieldOfView2.default(60, 60, 60, 60);
+		var fov = 50 / 2;
+		_this._fov = new _XRFieldOfView2.default(fov, fov, fov, fov);
 		_this._depthNear = 0.1;
 		_this._depthFar = 1000;
 
