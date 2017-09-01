@@ -28,6 +28,7 @@ export default class CameraReality extends Reality {
 		this._arCoreCanvas = null
 		this._elContext = null
 		this._vrDisplay = null
+		this._vrFrameData = null
 
 		if(typeof navigator.getVRDisplays === 'function'){
 			navigator.getVRDisplays().then(displays => {
@@ -35,6 +36,7 @@ export default class CameraReality extends Reality {
 					if(display === null) continue
 					if(display.capabilities.hasPassThroughCamera){
 						this._vrDisplay = display
+						this._vrFrameData = new VRFrameData()
 						this._arCoreCanvas = document.createElement('canvas')
 						this._xr._realityEls.appendChild(this._arCoreCanvas)
 						this._arCoreCanvas.width = window.innerWidth
@@ -62,6 +64,7 @@ export default class CameraReality extends Reality {
 	_handleNewFrame(){
 		if(this._arCoreCameraRenderer){
 			this._arCoreCameraRenderer.render()
+			this._vrDisplay.getFrameData(this._vrFrameData)
 		}
 	}
 
@@ -127,7 +130,7 @@ export default class CameraReality extends Reality {
 	_addAnchor(anchor){
 		console.log('reality adding anchor', anchor)
 
-		// TODO talk to ARKit to create an anchor
+		// TODO talk to ARKit or ARCore to create an anchor
 
 		this._anchors.set(anchor.uid, anchor)
 		return anchor.uid

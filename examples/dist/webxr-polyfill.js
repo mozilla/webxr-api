@@ -3071,6 +3071,7 @@ var CameraReality = function (_Reality) {
 		_this._arCoreCanvas = null;
 		_this._elContext = null;
 		_this._vrDisplay = null;
+		_this._vrFrameData = null;
 
 		if (typeof navigator.getVRDisplays === 'function') {
 			navigator.getVRDisplays().then(function (displays) {
@@ -3085,6 +3086,7 @@ var CameraReality = function (_Reality) {
 						if (display === null) continue;
 						if (display.capabilities.hasPassThroughCamera) {
 							_this._vrDisplay = display;
+							_this._vrFrameData = new VRFrameData();
 							_this._arCoreCanvas = document.createElement('canvas');
 							_this._xr._realityEls.appendChild(_this._arCoreCanvas);
 							_this._arCoreCanvas.width = window.innerWidth;
@@ -3131,6 +3133,7 @@ var CameraReality = function (_Reality) {
 		value: function _handleNewFrame() {
 			if (this._arCoreCameraRenderer) {
 				this._arCoreCameraRenderer.render();
+				this._vrDisplay.getFrameData(this._vrFrameData);
 			}
 		}
 	}, {
@@ -3205,7 +3208,7 @@ var CameraReality = function (_Reality) {
 		value: function _addAnchor(anchor) {
 			console.log('reality adding anchor', anchor);
 
-			// TODO talk to ARKit to create an anchor
+			// TODO talk to ARKit or ARCore to create an anchor
 
 			this._anchors.set(anchor.uid, anchor);
 			return anchor.uid;

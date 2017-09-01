@@ -8,8 +8,7 @@ class ARSimplestExample extends XRExampleBase {
 
 	// Called during construction
 	initializeScene(){
-		fillInTeapotScene(this.scene)
-		this.scene.children[0].rotation.y += 0.5
+		fillInDirectionalScene(this.scene)
 	}
 
 	// Called once per frame

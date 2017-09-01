@@ -13,6 +13,9 @@ class XRExampleBase {
 		this.frameOfReferenceTypes = frameOfReferenceTypes
 		this.createVirtualReality = createVirtualReality
 
+		this.hasWebkit = typeof window.webkit !== 'undefined'
+		if(this.hasWebkit) this.setupWebkitUI()
+
 		// Set during the XR.getDisplays call below
 		this.display = null
 		this.session = null
@@ -55,7 +58,6 @@ class XRExampleBase {
 		Empties this.el, adds a div with the message text, and shows a button to test rendering the scene to this.el
 	*/
 	showMessage(messageText){
-		this.el.innerHTML = ''
 		let message = document.createElement('div')
 		message.innerHTML = messageText
 		this.el.append(message)
@@ -87,6 +89,7 @@ class XRExampleBase {
 		this.renderer = new THREE.WebGLRenderer({
 			canvas: glCanvas,
 			context: glContext,
+			antialias: false,
 			alpha: true
 		})
 		this.renderer.setPixelRatio(1)
@@ -166,6 +169,40 @@ class XRExampleBase {
 			this.renderer.render(this.scene, this.camera)
 		}
 	}
+
+	setupWebkitUI(){
+		this.webkitControlEl = document.createElement('div')
+		this.el.appendChild(this.webkitControlEl)
+		this.webkitControlEl.setAttribute('class', 'webkit-control')
+		this.locationInput = document.createElement('input')
+		this.locationInput.style.width = '50%'
+		this.locationInput.value = '' + document.location.href
+		this.webkitControlEl.appendChild(this.locationInput)
+		this.locationButton = document.createElement('button')
+		this.locationButton.innerHTML = 'load'
+		this.webkitControlEl.appendChild(this.locationButton)
+
+		this.locationButton.addEventListener('click', ev => {
+			window.webkit.messageHandlers.loadUrl.postMessage({
+	            url: this.locationInput.value
+	        })
+		})
+	}
+}
+
+function fillInDirectionalScene(scene){
+	let ambientLight = new THREE.AmbientLight('#FFF', 1)
+	scene.add(ambientLight)
+
+	let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
+	scene.add(directionalLight)
+
+	loadObj('./models/', 'Axis.obj').then(node => {
+		scene.add(node)
+		console.log('added', node, scene)
+	}).catch((...params) =>{
+		console.error('could not load axis', ...params)
+	})
 }
 
 function fillInTeapotScene(scene){
@@ -200,6 +237,26 @@ function fillInBoxScene(scene){
 	scene.add(directionalLight)
 
 	return scene
+}
+
+function loadObj(baseURL, geometry){
+	return new Promise(function(resolve, reject){
+		const mtlLoader = new THREE.MTLLoader()
+		mtlLoader.setPath(baseURL)
+		const mtlName = geometry.split('.')[geometry.split(':').length - 1] + '.mtl'
+		mtlLoader.load(mtlName, (materials) => {
+			materials.preload()
+			let objLoader = new THREE.OBJLoader()
+			objLoader.setMaterials(materials)
+			objLoader.setPath(baseURL)
+			objLoader.load(geometry, (obj) => {
+				resolve(obj)
+			}, () => {} , (...params) => {
+				console.error('Failed to load obj', ...params)
+				reject(...params)
+			})
+		})
+	})
 }
 
 /*
