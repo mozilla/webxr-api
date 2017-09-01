@@ -2800,8 +2800,6 @@ var FlatDisplay = function (_XRDisplay) {
 					this._devicePosition = new THREE.Vector3();
 					this._deviceScale = new THREE.Vector3(1, 1, 1);
 					this._deviceWorldMatrix = new THREE.Matrix4();
-
-					console.log('using vr frame data');
 				}
 			} else if (_ARKitWrapper2.default.HasARKit()) {
 				// Use ARKit
@@ -2855,7 +2853,6 @@ var FlatDisplay = function (_XRDisplay) {
 
 			this._reality._vrDisplay.getFrameData(this._vrFrameData);
 			this._views[0].setProjectionMatrix(this._vrFrameData.leftProjectionMatrix);
-			throttledConsoleLog('projection view', this._vrFrameData.pose.position, this._vrFrameData.pose.orientation);
 			(_deviceOrientation = this._deviceOrientation).set.apply(_deviceOrientation, _toConsumableArray(this._vrFrameData.pose.orientation));
 			(_devicePosition = this._devicePosition).set.apply(_devicePosition, _toConsumableArray(this._vrFrameData.pose.position));
 			this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale);
