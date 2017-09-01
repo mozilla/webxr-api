@@ -66,6 +66,8 @@ export default class XRSession extends EventHandlerBase {
 		}
 		// TODO If ARKit is present, switch to using the ARKit watch callback
 		return window.requestAnimationFrame(() => {
+			this._display._reality._handleNewFrame()
+			this._display._handleNewFrame()
 			callback(this._createPresentationFrame())
 		})
 	}
@@ -80,9 +82,6 @@ export default class XRSession extends EventHandlerBase {
 	}
 
 	_createPresentationFrame(){
-		if(typeof this._display._reality._render === 'function'){
-			this._display._reality._render()
-		}
 		return new XRPresentationFrame(this)
 	}
 

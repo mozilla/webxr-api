@@ -22,7 +22,7 @@ export default class XRDisplay extends EventHandlerBase {
 		this._eyeLevelPose = new XRViewPose([0, 1.65, 0])
 		this._stagePose = new XRViewPose()
 
-		this._fov = new XRFieldOfView(45, 45, 45, 45)
+		this._fov = new XRFieldOfView(60, 60, 60, 60)
 		this._depthNear = 0.1
 		this._depthFar = 1000
 
@@ -58,6 +58,11 @@ export default class XRDisplay extends EventHandlerBase {
 	_supportedCreationParameters(parameters){
 		throw 'Should be implemented by extending class'
 	}
+
+	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){}
 
 	//attribute EventHandler ondeactivate;
 }

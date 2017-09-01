@@ -48,13 +48,18 @@ export default class CameraReality extends Reality {
 							this._arCoreCanvas.height = window.innerHeight
 						}, false)
 						break
+					} else {
+						console.log('Found a non-pass-through camera VR display', display)
 					}
 				}
 			})
 		}
 	}
 
-	_render(){
+	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){
 		if(this._arCoreCameraRenderer){
 			this._arCoreCameraRenderer.render()
 		}

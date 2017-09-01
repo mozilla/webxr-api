@@ -21,10 +21,15 @@ export default class FlatDisplay extends XRDisplay {
 		this._initialized = false
 
 		// This is used if we have ARKit support
-		this._arKitWrapper = null // ARKitWrapper
+		this._arKitWrapper = null
 
-		// These are used if we don't have ARKit support and instead use window orientation events
-		this._deviceOrientationTracker = null	// DeviceOrientationTracker
+		// This is used if we have ARCore support
+		this._vrFrameData = null
+
+		// This is used if we are using orientation events
+		this._deviceOrientationTracker = null
+
+		// These are used if we have ARCore support or use window orientation events
 		this._deviceOrientation = null			// THREE.Quaternion
 		this._devicePosition = null				// THREE.Vector3
 		this._deviceScale = null				// THREE.Vector3
@@ -35,7 +40,17 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_start(){
-		if(ARKitWrapper.HasARKit()){
+		if(this._reality._vrDisplay){ // Use ARCore
+			if(this._vrFrameData === null){
+				this._vrFrameData = new VRFrameData()
+    			this._views[0]._depthNear = this._reality._vrDisplay.depthNear
+    			this._views[0]._depthFar = this._reality._vrDisplay.depthFar
+				this._deviceOrientation = new THREE.Quaternion()
+				this._devicePosition = new THREE.Vector3()
+				this._deviceScale = new THREE.Vector3(1, 1, 1)
+				this._deviceWorldMatrix = new THREE.Matrix4()
+			}
+		} else if(ARKitWrapper.HasARKit()){ // Use ARKit
 			if(this._initialized === false){
 				this._initialized = true
 				this._arKitWrapper = ARKitWrapper.GetOrCreate()
@@ -47,7 +62,7 @@ export default class FlatDisplay extends XRDisplay {
 			} else {
 				this._arKitWrapper.watch()
 			}
-		} else {
+		} else { // Use device orientation
 			if(this._initialized === false){
 				this._initialized = true
 				this._deviceOrientation = new THREE.Quaternion()
@@ -63,7 +78,25 @@ export default class FlatDisplay extends XRDisplay {
 	}
 
 	_stop(){
-		// TODO figure out how to stop ARKit so CameraReality can still work
+		// TODO figure out how to stop ARKit and ARCore so that CameraReality can still work
+	}
+
+	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){
+		if(this._vrFrameData !== null){
+			this._updateFromVRDevice()
+		}
+	}
+
+	_updateFromVRDevice(){
+		this._reality._vrDisplay.getFrameData(this._vrFrameData)
+		this._views[0].setProjectionMatrix(this._vrFrameData.leftProjectionMatrix)
+		this._deviceOrientation.set(...this._vrFrameData.pose.orientation)
+		this._devicePosition.set(...this._vrFrameData.pose.position)
+		this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale)
+		this._headPose._setPoseModelMatrix(this._deviceWorldMatrix.toArray())
 	}
 
 	_updateFromDeviceOrientationTracker(){

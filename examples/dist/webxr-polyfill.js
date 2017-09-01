@@ -530,7 +530,7 @@ var XRDisplay = function (_EventHandlerBase) {
 		_this._eyeLevelPose = new XRViewPose([0, 1.65, 0]);
 		_this._stagePose = new XRViewPose();
 
-		_this._fov = new _XRFieldOfView2.default(45, 45, 45, 45);
+		_this._fov = new _XRFieldOfView2.default(60, 60, 60, 60);
 		_this._depthNear = 0.1;
 		_this._depthFar = 1000;
 
@@ -572,6 +572,14 @@ var XRDisplay = function (_EventHandlerBase) {
 		value: function _supportedCreationParameters(parameters) {
 			throw 'Should be implemented by extending class';
 		}
+
+		/*
+  Called by a session before it hands a new XRPresentationFrame to the app
+  */
+
+	}, {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {}
 
 		//attribute EventHandler ondeactivate;
 
@@ -662,6 +670,8 @@ var XRSession = function (_EventHandlerBase) {
 			}
 			// TODO If ARKit is present, switch to using the ARKit watch callback
 			return window.requestAnimationFrame(function () {
+				_this3._display._reality._handleNewFrame();
+				_this3._display._handleNewFrame();
 				callback(_this3._createPresentationFrame());
 			});
 		}
@@ -679,9 +689,6 @@ var XRSession = function (_EventHandlerBase) {
 	}, {
 		key: '_createPresentationFrame',
 		value: function _createPresentationFrame() {
-			if (typeof this._display._reality._render === 'function') {
-				this._display._reality._render();
-			}
 			return new XRPresentationFrame(this);
 		}
 	}, {
@@ -886,6 +893,14 @@ var Reality = function (_EventHandlerBase) {
 		value: function _stop() {
 			throw 'Exending classes should implement _stop';
 		}
+
+		/*
+  Called by a session before it hands a new XRPresentationFrame to the app
+  */
+
+	}, {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {}
 
 		/*
   Create an anchor hung in space
@@ -2724,6 +2739,8 @@ var _ARKitWrapper2 = _interopRequireDefault(_ARKitWrapper);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2749,10 +2766,15 @@ var FlatDisplay = function (_XRDisplay) {
 		_this._initialized = false;
 
 		// This is used if we have ARKit support
-		_this._arKitWrapper = null; // ARKitWrapper
+		_this._arKitWrapper = null;
 
-		// These are used if we don't have ARKit support and instead use window orientation events
-		_this._deviceOrientationTracker = null; // DeviceOrientationTracker
+		// This is used if we have ARCore support
+		_this._vrFrameData = null;
+
+		// This is used if we are using orientation events
+		_this._deviceOrientationTracker = null;
+
+		// These are used if we have ARCore support or use window orientation events
 		_this._deviceOrientation = null; // THREE.Quaternion
 		_this._devicePosition = null; // THREE.Vector3
 		_this._deviceScale = null; // THREE.Vector3
@@ -2768,7 +2790,21 @@ var FlatDisplay = function (_XRDisplay) {
 		value: function _start() {
 			var _this2 = this;
 
-			if (_ARKitWrapper2.default.HasARKit()) {
+			if (this._reality._vrDisplay) {
+				// Use ARCore
+				if (this._vrFrameData === null) {
+					this._vrFrameData = new VRFrameData();
+					this._views[0]._depthNear = this._reality._vrDisplay.depthNear;
+					this._views[0]._depthFar = this._reality._vrDisplay.depthFar;
+					this._deviceOrientation = new THREE.Quaternion();
+					this._devicePosition = new THREE.Vector3();
+					this._deviceScale = new THREE.Vector3(1, 1, 1);
+					this._deviceWorldMatrix = new THREE.Matrix4();
+
+					console.log('using vr frame data');
+				}
+			} else if (_ARKitWrapper2.default.HasARKit()) {
+				// Use ARKit
 				if (this._initialized === false) {
 					this._initialized = true;
 					this._arKitWrapper = _ARKitWrapper2.default.GetOrCreate();
@@ -2781,6 +2817,7 @@ var FlatDisplay = function (_XRDisplay) {
 					this._arKitWrapper.watch();
 				}
 			} else {
+				// Use device orientation
 				if (this._initialized === false) {
 					this._initialized = true;
 					this._deviceOrientation = new THREE.Quaternion();
@@ -2796,8 +2833,33 @@ var FlatDisplay = function (_XRDisplay) {
 		}
 	}, {
 		key: '_stop',
-		value: function _stop() {
-			// TODO figure out how to stop ARKit so CameraReality can still work
+		value: function _stop() {}
+		// TODO figure out how to stop ARKit and ARCore so that CameraReality can still work
+
+
+		/*
+  Called by a session before it hands a new XRPresentationFrame to the app
+  */
+
+	}, {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {
+			if (this._vrFrameData !== null) {
+				this._updateFromVRDevice();
+			}
+		}
+	}, {
+		key: '_updateFromVRDevice',
+		value: function _updateFromVRDevice() {
+			var _deviceOrientation, _devicePosition;
+
+			this._reality._vrDisplay.getFrameData(this._vrFrameData);
+			this._views[0].setProjectionMatrix(this._vrFrameData.leftProjectionMatrix);
+			throttledConsoleLog('projection view', this._vrFrameData.pose.position, this._vrFrameData.pose.orientation);
+			(_deviceOrientation = this._deviceOrientation).set.apply(_deviceOrientation, _toConsumableArray(this._vrFrameData.pose.orientation));
+			(_devicePosition = this._devicePosition).set.apply(_devicePosition, _toConsumableArray(this._vrFrameData.pose.position));
+			this._deviceWorldMatrix.compose(this._devicePosition, this._deviceOrientation, this._deviceScale);
+			this._headPose._setPoseModelMatrix(this._deviceWorldMatrix.toArray());
 		}
 	}, {
 		key: '_updateFromDeviceOrientationTracker',
@@ -3039,6 +3101,8 @@ var CameraReality = function (_Reality) {
 								_this._arCoreCanvas.height = window.innerHeight;
 							}, false);
 							break;
+						} else {
+							console.log('Found a non-pass-through camera VR display', display);
 						}
 					}
 				} catch (err) {
@@ -3060,9 +3124,14 @@ var CameraReality = function (_Reality) {
 		return _this;
 	}
 
+	/*
+ Called by a session before it hands a new XRPresentationFrame to the app
+ */
+
+
 	_createClass(CameraReality, [{
-		key: '_render',
-		value: function _render() {
+		key: '_handleNewFrame',
+		value: function _handleNewFrame() {
 			if (this._arCoreCameraRenderer) {
 				this._arCoreCameraRenderer.render();
 			}

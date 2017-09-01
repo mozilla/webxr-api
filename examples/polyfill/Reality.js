@@ -39,6 +39,11 @@ export default class Reality extends EventHandlerBase {
 	}
 
 	/*
+	Called by a session before it hands a new XRPresentationFrame to the app
+	*/
+	_handleNewFrame(){}
+
+	/*
 	Create an anchor hung in space
 	*/
 	_addAnchor(anchor){
