@@ -530,7 +530,8 @@ var XRDisplay = function (_EventHandlerBase) {
 		_this._eyeLevelPose = new XRViewPose([0, 1.65, 0]);
 		_this._stagePose = new XRViewPose();
 
-		_this._fov = new _XRFieldOfView2.default(45, 45, 45, 45);
+		var fov = 58 / 2;
+		_this._fov = new _XRFieldOfView2.default(fov, fov, fov, fov);
 		_this._depthNear = 0.1;
 		_this._depthFar = 1000;
 
@@ -2908,7 +2909,7 @@ var DeviceOrientationTracker = function (_EventHandlerBase) {
 				outQuaternion.set(0, 0, 0, 1);
 				return false;
 			}
-			DeviceOrientationTracker.WORKING_EULER.set(this._deviceOrientation.beta * DeviceOrientationTracker.DEG_TO_RAD, this._deviceOrientation.alpha * DeviceOrientationTracker.DEG_TO_RAD, -1 * this._deviceOrientation.gamma * DeviceOrientationTracker.DEG_TO_RAD, 'YXZ');
+			DeviceOrientationTracker.WORKING_EULER.set((this._deviceOrientation.beta - 45) * DeviceOrientationTracker.DEG_TO_RAD, this._deviceOrientation.alpha * DeviceOrientationTracker.DEG_TO_RAD, -1 * this._deviceOrientation.gamma * DeviceOrientationTracker.DEG_TO_RAD, 'YXZ');
 			outQuaternion.setFromEuler(DeviceOrientationTracker.WORKING_EULER);
 			outQuaternion.multiply(DeviceOrientationTracker.HALF_PI_AROUND_X);
 			outQuaternion.multiply(DeviceOrientationTracker.WORKING_QUATERNION.setFromAxisAngle(DeviceOrientationTracker.Z_AXIS, -this._windowOrientation));

@@ -31,7 +31,7 @@ export default class DeviceOrientationTracker extends EventHandlerBase {
 			return false
 		}
 		DeviceOrientationTracker.WORKING_EULER.set(
-			this._deviceOrientation.beta * DeviceOrientationTracker.DEG_TO_RAD, 
+			(this._deviceOrientation.beta-45) * DeviceOrientationTracker.DEG_TO_RAD, 
 			this._deviceOrientation.alpha * DeviceOrientationTracker.DEG_TO_RAD, 
 			-1 * this._deviceOrientation.gamma * DeviceOrientationTracker.DEG_TO_RAD, 
 			'YXZ'

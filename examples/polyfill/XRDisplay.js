@@ -22,7 +22,8 @@ export default class XRDisplay extends EventHandlerBase {
 		this._eyeLevelPose = new XRViewPose([0, 1.65, 0])
 		this._stagePose = new XRViewPose()
 
-		this._fov = new XRFieldOfView(45, 45, 45, 45)
+		var fov = 58/2;
+		this._fov = new XRFieldOfView(fov, fov, fov, fov)
 		this._depthNear = 0.1
 		this._depthFar = 1000
 
