@@ -1,5 +1,5 @@
 /*
-	XRExampleBase holds all of the common XR setup, rendering, and teardown code
+	XRExampleBase holds all of the common XR setup, rendering, and teardown code for a THREE.js based app
 	Extending classes should be able to focus on rendering their scene
 
 	Parameters:
@@ -25,6 +25,7 @@ class XRExampleBase {
 		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000) // These values will be overwritten by the projection matrix from ARKit or ARCore
 		this.renderer = null // Set in this.handleNewSession
 
+		// Give extending classes the opportunity to initially populate the stage group
 		this.initializeStageGroup(this.stageGroup)
 
 		if(typeof navigator.XR === 'undefined'){
@@ -79,6 +80,8 @@ class XRExampleBase {
 		if(glContext === null){
 			throw 'Could not create GL context'
 		}
+
+		// Set the session's base layer into which the app will render
 		this.session.baseLayer = new XRWebGLLayer(this.session, glContext)
 
 		// Handle layer focus events
@@ -226,24 +229,6 @@ function fillInGLTFScene(path, scene, position=[0, 0, -2], scale=[1, 1, 1]){
 	}).catch((...params) =>{
 		console.error('could not load gltf', ...params)
 	})
-}
-
-function fillInTeapotScene(scene){
-	var geometry = new THREE.TeapotBufferGeometry(0.1)
-	let materialColor = new THREE.Color()
-	materialColor.setRGB(1.0, 1.0, 1.0)
-	let material = new THREE.MeshLambertMaterial({ color: materialColor, side: THREE.DoubleSide })
-	let mesh = new THREE.Mesh(geometry, material)
-	mesh.position.set(0, 0, -1)
-	scene.add(mesh)
-
-	let ambientLight = new THREE.AmbientLight('#FFF', 0.4)
-	scene.add(ambientLight)
-
-	let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
-	scene.add(directionalLight)
-
-	return scene
 }
 
 function fillInBoxScene(scene){

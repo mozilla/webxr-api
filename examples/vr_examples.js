@@ -1,7 +1,8 @@
 
-class VRSetupExample extends XRExampleBase {
+class VRSimplestExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, true)
+		super(domElement, true) 
+		// We haven't implemented VR displays so the session creation will fail
 	}
 
 
@@ -12,6 +13,5 @@ class VRSetupExample extends XRExampleBase {
 
 	// Called once per frame
 	updateStageGroup(frame, stageCoordinateSystem, stagePose){
-
 	}
 }
