@@ -1,22 +1,17 @@
 
 class VRSetupExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['stage', 'eyeLevel'], true)
+		super(domElement, true)
 	}
 
 
 	// Called during construction
-	initializeScene(){
-		fillInBoxScene(this.scene)		
+	initializeStageGroup(){
+		fillInBoxScene(this.stageGroup)
 	}
 
 	// Called once per frame
-	updateScene(frame, coordinateSystem, pose){
-
-	}
-
-	// Called once per frame
-	updateRealityScene(frame, coordinateSystem, pose){
+	updateStageGroup(frame, stageCoordinateSystem, stagePose){
 
 	}
 }

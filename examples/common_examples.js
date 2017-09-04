@@ -4,13 +4,11 @@
 
 	Parameters:
 		domElement: an element used to show error messages
-		frameOfReferenceTypes: an array of one or more XRFrameOfReferenceType
 		createVirtualReality: if true, create a new empty reality for this app
 */
 class XRExampleBase {
-	constructor(domElement, frameOfReferenceTypes, createVirtualReality=true){
+	constructor(domElement, createVirtualReality=true){
 		this.el = domElement
-		this.frameOfReferenceTypes = frameOfReferenceTypes
 		this.createVirtualReality = createVirtualReality
 
 		this.hasWebkit = typeof window.webkit !== 'undefined'
@@ -21,19 +19,18 @@ class XRExampleBase {
 		this.session = null
 
 		// Create a simple THREE test scene for the layer
-		this.scene = new THREE.Scene()
-		this.rootGroup = new THREE.Group()
-		this.scene.add(this.rootGroup)
-		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000)
+		this.scene = new THREE.Scene() // The scene will be rotated and oriented around the camera using the head pose
+		this.stageGroup = new THREE.Group() // The group that stays on the "stage", which is at foot level relative to the head
+		this.scene.add(this.stageGroup)
+		this.camera = new THREE.PerspectiveCamera(70, 1024, 1024, 1, 1000) // These values will be overwritten by the projection matrix from ARKit or ARCore
 		this.renderer = null // Set in this.handleNewSession
 
-		this.initializeScene(this.rootGroup)
+		this.initializeStageGroup(this.stageGroup)
 
 		if(typeof navigator.XR === 'undefined'){
-			this.showMessage('No WebXR API found')
+			this.showMessage('No WebXR API found, usually because the WebXR polyfill has not loaded')
 			return
 		}
-
 
 		// Get a display and then request a session
 		navigator.XR.getDisplays().then(displays => {
@@ -52,7 +49,8 @@ class XRExampleBase {
 				this.showMessage('Could not initiate the session')
 			})
 		}).catch(err => {
-			console.error('Could not get XR displays', err)
+			console.error('Error getting XR displays', err)
+			this.showMessage('Could not get XR displays')
 		})
 	}
 
@@ -130,37 +128,42 @@ class XRExampleBase {
 	handleLayerBlur(ev){}
 
 	/*
-		Extending classes should override this to set up the scene during class construction
+	Extending classes should override this to set up the stageGroup during class construction
 	*/
-	initializeScene(){}
+	initializeStageGroup(){}
 
 	/*
-		Extending classes that need to update the layer during each frame should override these methods
+	Extending classes that need to update the layer during each frame should override this method
 	*/
-	updateScene(frame, coordinateSystem, pose){}
+	updateStageGroup(frame, stageCoordinateSystem, stagePose){}
 
 	handleFrame(frame){
 		const nextFrameRequest = this.session.requestFrame(frame => { this.handleFrame(frame) })
-		let sceneCoordinateSystem = frame.getCoordinateSystem(...this.frameOfReferenceTypes)
-		if(sceneCoordinateSystem === null){
-			this.showMessage('Could not get a usable coordinate system')
+		let stageCoordinateSystem = frame.getCoordinateSystem('stage')
+		if(stageCoordinateSystem === null){
+			this.showMessage('Could not get a usable stage coordinate system')
 			this.session.cancelFrame(nextFrameRequest)
 			this.session.endSession()
 			// Production apps could render a 'waiting' message and keep checking for an acceptable coordinate system
 			return
 		}
-		let scenePose = frame.getViewPose(sceneCoordinateSystem)
+
+		// Get the two poses we care about: the foot level stage and head pose which is updated by ARKit, ARCore, or orientation events
+		let stagePose = frame.getViewPose(stageCoordinateSystem)
 		let headPose = frame.getViewPose(frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL))
 
-		this.updateScene(frame, sceneCoordinateSystem, scenePose)
+		// Let the extending class update the stageGroup before each render
+		this.updateStageGroup(frame, stageCoordinateSystem, stagePose)
 
-		this.rootGroup.matrixAutoUpdate = false
-		this.rootGroup.matrix.fromArray(scenePose.poseModelMatrix)
-		this.rootGroup.matrix.elements[12] -= headPose.poseModelMatrix[12]
-		this.rootGroup.matrix.elements[13] -= headPose.poseModelMatrix[13]
-		this.rootGroup.matrix.elements[14] -= headPose.poseModelMatrix[14]
-		this.rootGroup.updateMatrixWorld(true)
+		// Update the stage group relative to the current head pose
+		this.stageGroup.matrixAutoUpdate = false
+		this.stageGroup.matrix.fromArray(stagePose.poseModelMatrix)
+		this.stageGroup.matrix.elements[12] -= headPose.poseModelMatrix[12]
+		this.stageGroup.matrix.elements[13] -= headPose.poseModelMatrix[13]
+		this.stageGroup.matrix.elements[14] -= headPose.poseModelMatrix[14]
+		this.stageGroup.updateMatrixWorld(true)
 
+		// Prep THREE.js for the render of each XRView
 		this.renderer.resetGLState()
 		this.scene.matrixAutoUpdate = false
 		this.renderer.autoClear = false
@@ -171,18 +174,23 @@ class XRExampleBase {
 
 		// Render each view into this.session.baseLayer.context
 		for(const view of frame.views){
-			//throttledConsoleLog('pose', ...headPose._position)
+			// Each XRView has its own projection matrix, so set the camera to use that
 			this.camera.projectionMatrix.fromArray(view.projectionMatrix)
 
+			// Set the scene's view matrix using the head pose
 			this.scene.matrix.fromArray(headPose.getViewMatrix(view))
 			this.scene.updateMatrixWorld(true)
 
+			// Set up the renderer to the XRView's viewport and then render
 			const viewport = view.getViewport(this.session.baseLayer)
 			this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
 			this.renderer.render(this.scene, this.camera)
 		}
 	}
 
+	/*
+	A temporary UI to show on the iOS app until the app itself provides a URL bar
+	*/
 	setupWebkitUI(){
 		this.webkitControlEl = document.createElement('div')
 		this.el.appendChild(this.webkitControlEl)
@@ -203,17 +211,20 @@ class XRExampleBase {
 	}
 }
 
-function fillInDirectionalScene(scene){
+function fillInGLTFScene(path, scene, position=[0, 0, -2], scale=[1, 1, 1]){
 	let ambientLight = new THREE.AmbientLight('#FFF', 1)
 	scene.add(ambientLight)
 
 	let directionalLight = new THREE.DirectionalLight('#FFF', 0.6)
 	scene.add(directionalLight)
 
-	loadObj('./models/', 'Axis.obj').then(node => {
-		scene.add(node)
+	loadGLTF(path).then(gltf => {
+		gltf.scene.scale.set(...scale)
+		gltf.scene.position.set(...position)
+		//gltf.scene.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / -2)
+		scene.add(gltf.scene)
 	}).catch((...params) =>{
-		console.error('could not load axis', ...params)
+		console.error('could not load gltf', ...params)
 	})
 }
 
@@ -249,6 +260,24 @@ function fillInBoxScene(scene){
 	scene.add(directionalLight)
 
 	return scene
+}
+
+function loadGLTF(url){
+	return new Promise((resolve, reject) => {
+		let loader = new THREE.GLTFLoader()
+		loader.load(url, (gltf) => {
+			if(gltf === null){
+				reject()
+			}
+			if(gltf.animations && gltf.animations.length){
+				let mixer = new THREE.AnimationMixer(gltf.scene)
+				for(let animation of gltf.animations){
+					mixer.clipAction(animation).play()
+				}
+			}
+			resolve(gltf)
+		})
+	})
 }
 
 function loadObj(baseURL, geometry){

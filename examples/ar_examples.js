@@ -1,27 +1,35 @@
 
 
-
+/*
+ARSimplestExample shows how to populate the stage group that is rendered on the stage 
+*/
 class ARSimplestExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['stage'], false)
+		super(domElement, false)
 	}
 
-	// Called during construction
-	initializeScene(){
-		fillInDirectionalScene(this.rootGroup)
+	// Called during construction to allow the app to populate this.stageGroup (a THREE.Group)
+	initializeStageGroup(){
+		this.stageGroup.add(new THREE.AmbientLight('#FFF', 1))
+		this.stageGroup.add(new THREE.DirectionalLight('#FFF', 0.6))
+		loadObj('./models/', 'Axis.obj').then(node => {
+			this.stageGroup.add(node)
+		}).catch((...params) =>{
+			console.error('could not load axis', ...params)
+		})
 	}
 
-	// Called once per frame
-	updateScene(frame, coordinateSystem, pose){
-		// Spin the cube to show this method is called
-		//this.rootGroup.children[0].rotation.x += 0.005
-		//this.rootGroup.children[0].rotation.y += 0.01
+	// Called once per frame, before render to give the app a chance to update this.stageGroup (a THREE.Group)
+	updateStageGroup(frame, stageCoordinateSystem, stagePose){
+		// Spin the group to show this method is called
+		//this.children[0].rotation.x += 0.005
+		//this.children[0].rotation.y += 0.01
 	}
 }
 
 class ARAnchorExample extends XRExampleBase {
 	constructor(domElement){
-		super(domElement, ['headModel'], false)
+		super(domElement, false)
 		this.anchorsToAdd = [] // { node, x, y, z }
 		this.anchoredNodes = [] // { anchorUID, node }
 
@@ -35,7 +43,7 @@ class ARAnchorExample extends XRExampleBase {
 	}
 
 	// Called during construction
-	initializeScene(){
+	initializeStageGroup(){
 	}
 
 	createSceneGraphNode(){
@@ -56,7 +64,7 @@ class ARAnchorExample extends XRExampleBase {
 	}
 
 	// Called once per frame
-	updateScene(frame, coordinateSystem, pose){
+	updateStageGroup(frame, stageCoordinateSystem, stagePose){
 		// Create anchors for newly anchored nodes
 		for(let anchorToAdd of this.anchorsToAdd){
 			const anchor = new XRAnchor(new XRCoordinates(this.session.display, coordinateSystem, [anchorToAdd.x, anchorToAdd.y, anchorToAdd.z]))
