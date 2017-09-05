@@ -80,9 +80,12 @@ export default class ARKitWrapper extends EventHandlerBase {
 
 	/*
 	getData looks into the most recent ARKit data (as received by onWatch) for a key
-	returns the key's value or null if it doesn't exist
+	returns the key's value or null if it doesn't exist or if a key is not specified it returns all data
 	*/
-	getData(key){
+	getData(key = null){
+		if (key === null) {
+			return this._rawARData
+		}
 		if(this._rawARData && typeof this._rawARData[key] !== 'undefined'){
 			return this._rawARData[key]
 		}
@@ -100,6 +103,9 @@ export default class ARKitWrapper extends EventHandlerBase {
 	return null if object with `name` is not found
 	*/
 	getObject(name){
+		if (!this._isInitialized) {
+			return false
+		}
 		const objects = this.getKey('objects')
 		if(objects === null) return null
 		for(const object of objects){
@@ -228,10 +234,10 @@ export default class ARKitWrapper extends EventHandlerBase {
 
 	*/
 	_onWatch(data) {
-		this._rawARData = JSON.parse(data)
+		this._rawARData = data
 		this.dispatchEvent(new CustomEvent(ARKitWrapper.WATCH_EVENT_NAME, {
 			source: this,
-			data: this._rawARData
+			detail: this._rawARData
 		}))
 	}
 
@@ -250,10 +256,9 @@ export default class ARKitWrapper extends EventHandlerBase {
 	data: { ? }
 	*/
 	_onAddObject(data) {
-		data = JSON.parse(data)
 		this.dispatchEvent(new CustomEvent(ARKitWrapper.ADD_OBJECT_NAME, {
 			source: this,
-			data: data
+			detail: data
 		}))
 	}
 	
