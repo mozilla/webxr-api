@@ -5,6 +5,8 @@ In order to make progress on defining WebXR, we are creating a proposal for this
 
 The initial interface draft is in [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md). 
 
+Example code using this draft WebXR API is available in the [webxr-examples repository](https://github.com/mozilla/webxr-examples).
+
 Some of the concepts we believe are important to have in WebXR include:
 
 - the ability to have reality renderer _inside_ the browser, as this is essential for enabling user privacy, easy cross platform application, and performance.
