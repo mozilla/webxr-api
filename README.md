@@ -5,7 +5,7 @@ In order to make progress on defining WebXR, we are creating a proposal for this
 
 The initial interface draft is in [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md). 
 
-Example code using this draft WebXR API is available in the [webxr-examples repository](https://github.com/mozilla/webxr-examples).
+A polyfill and example code using this draft WebXR API is available in the [webxr-polyfill repository](https://github.com/mozilla/webxr-polyfill).
 
 Some of the concepts we believe are important to have in WebXR include:
 
