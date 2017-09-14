@@ -215,6 +215,8 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		readonly attribute Float32Array projectionMatrix;
 		XRCameraPose? getPose(XRCoordinateSystem coordinateSystem); 
 	};
+	
+[ImageBitmap Extension](https://w3c.github.io/mediacapture-worker/#imagebitmap-extensions)
 
 ## XRCameraPose
 
