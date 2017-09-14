@@ -82,6 +82,8 @@ A Hololens could expose a single passthrough display.
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
+		FrozenArray<XRCamera> getCameras();
+
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
 
@@ -199,6 +201,28 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		readonly attribute double z;
 	};
 
+## XRCamera
+
+	interface XRCamera : XRCameraSource {
+		readonly attribute DOMString name;
+		Promise<void> requestAccess();
+	};
+
+## XRCameraFrame
+
+	interface XRCameraFrame {
+		readonly attribute ImageBitmap capturedImage;
+		readonly attribute Float32Array projectionMatrix;
+		XRCameraPose? getPose(XRCoordinateSystem coordinateSystem); 
+	};
+
+## XRCameraPose
+
+	interface XRCameraPose {
+		readonly attribute Float32Array poseModelMatrix;
+		readonly attribute Float32Array viewMatrix;
+	};
+
 ## XRPresentationFrame
 
 	interface XRPresentationFrame {
@@ -213,6 +237,8 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 
 		readonly attribute boolean hasLightEstimate;
 		readonly attribute XRLightEstimate? lightEstimate;
+
+		XRCameraFrame? getCameraFrame(XRCameraSource cameraSource);
 
 		readonly attribute sequence<XRAnchor> anchors;
 		DOMString addAnchor(XRAnchor anchor);
