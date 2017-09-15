@@ -203,8 +203,20 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 
 ## XRCamera
 
+	enum XRCameraKindEnum {
+		"color",
+		"depth",
+		"ir"
+	};
+
 	interface XRCamera : XRCameraSource {
-		readonly attribute DOMString name;
+		readonly attribute DOMString kind;
+		readonly attribute DOMString id;
+		readonly attribute DOMString label;
+		readonly attribute long width;
+		readonly attribute long height;
+		readonly attribute double aspectRatio;
+		readonly attribute double frameRate;
 		Promise<void> requestAccess();
 	};
 
