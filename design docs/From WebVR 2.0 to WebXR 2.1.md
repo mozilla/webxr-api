@@ -1,6 +1,6 @@
 ## WebVR 2.0 changes to *allow* AR
 
-These are the minimal changes to 2.0 needed so that at some point in the future we could support AR of the type described in [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md) and implemented in [webxr-polyfill](https://github.com/mozilla/webxr-polyfill).
+These are the minimal changes to WebVR 2.0 needed so that at some point in the future we could support AR of the type described in [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md) and implemented in [webxr-polyfill](https://github.com/mozilla/webxr-polyfill).
 
 ### Rename
 
@@ -27,15 +27,17 @@ These are the minimal changes to 2.0 needed so that at some point in the future 
 
 ## WebVR 2.0 changes to *support* AR
 
+These are the changes to WebVR 2.0 required to actually use the AR features in WebXR. 
+
 ### New interfaces
 
-- add Reality
-- add XRSessionRealityType
-- add XRPointCloud
-- add XRLightEstimate
-- add XRAnchor, XRPlaneAnchor, and XRAnchorOffset
-- add XRManifold
-- add XRCartographicCoordinates
+- Reality
+- XRSessionRealityType
+- XRPointCloud
+- XRLightEstimate
+- XRAnchor, XRPlaneAnchor, and XRAnchorOffset
+- XRManifold
+- XRCartographicCoordinates
 
 ### Interface additions
 
@@ -46,9 +48,3 @@ These are the minimal changes to 2.0 needed so that at some point in the future 
 - update XRLayer to include focus API
 - update XRPresentationFrame to add point cloud, light estimate, manifold, and anchor APIs
 
-
-## Questions
-
-- What to do about "exclusive" flag on session creation?
-- Do we need a coordinate system on the XRViewPose?
-- Will VR/XRSession have only one layer?
