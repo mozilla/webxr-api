@@ -2,6 +2,8 @@
 
 This document is based off of the [Editor's draft of WebVR](https://w3c.github.io/webvr/spec/latest/), modified to support both VR and AR.
 
+There is a [webxr-polyfill repo](https://github.com/mozilla/webxr-polyfill) with [example code](https://github.com/mozilla/webxr-polyfill/tree/master/examples).
+
 The major concepts are:
 
 *XRDisplay*: a particular device and method for rendering XR layers (e.g. Daydream, Vive, Rift, Hololens, GearVR, Cardboard, or magic window)
