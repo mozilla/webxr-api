@@ -37,8 +37,8 @@ _"VR" in names have been changed to "XR" to indicate that they are used for both
 		readonly attribute DOMString displayName;
 		readonly attribute boolean isExternal;
 
-		Promise<boolean> supportsSession(XRSessionCreateParametersInit parameters);
-		Promise<XRSession> requestSession(XRSessionCreateParametersInit parameters);
+		Promise<boolean> supportsSession(XRSessionCreateOptions parameters);
+		Promise<XRSession> requestSession(XRSessionCreateOptions parameters);
 
 		attribute EventHandler ondeactivate;
 	};
@@ -63,7 +63,10 @@ A Hololens could expose a single passthrough display.
 
 	interface XRSession : EventTarget {
 		readonly attribute XRDisplay display;
-		readonly attribute XRSessionCreateParameters createParameters;
+
+		readonly attribute boolean exclusive;
+		readonly attribute XRPresentationContext outputContext;
+		readonly attribute XRSessionType type;
 
 		readonly attribute <sequence <Reality>> realities; // All realities available to this session
 		readonly attribute Reality reality; // For augmentation sessions, this defaults to most recently used Reality. For reality sessions, this defaults to a new virtual Reality.
@@ -96,14 +99,14 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 
 	enum XRSessionType { "reality", "augmentation" };
 
-	dictionary XRSessionCreateParametersInit {
-		required boolean exclusive = true;
-		optional XRSessionType type = "reality";
+	dictionary XRSessionCreateOptions {
+		boolean exclusive;
+		XRPresentationContext outputContext;
+		XRSessionType type;
 	};
 
-	interface XRSessionCreateParameters {
-		readonly attribute boolean exclusive;
-		readonly attribute XRSessionType type;
+	[SecureContext, Exposed=Window] interface XRPresentationContext {
+		readonly attribute HTMLCanvasElement canvas;
 	};
 
 - 'exclusive' needs to be rethought given the new use of XRDisplay for magic window. Do we still need sessions that just want sensor data? 

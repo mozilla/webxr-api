@@ -1,6 +1,6 @@
 # WebVR 2.0 changes to allow XR
 
-This document represents the WebXR interfaces after using the "WebVR 2.0 changes to *allow* AR" list in [From WebVR 2.0 to WebXR 2.1.md](https://github.com/mozilla/webxr-api/blob/master/design%20docs/From%20WebVR%202.0%20to%20WebXR%202.1.md) to make the changes that will make it possible to eventually support AR. See the "WebVR 2.0 changes to *support* AR" list and the full [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md) for API changes that would be required to actually implement AR applications.
+This document represents the WebXR interfaces after using the minimal "WebVR 2.0 changes to *allow* AR" list in [From WebVR 2.0 to WebXR 2.1.md](https://github.com/mozilla/webxr-api/blob/master/design%20docs/From%20WebVR%202.0%20to%20WebXR%202.1.md) to make the changes that will make it possible to eventually support AR. See the "WebVR 2.0 changes to *support* AR" list and the full [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md) for API changes that would be required to actually implement AR applications.
 
 The major changes from WebVR "2.0" are:
 
@@ -12,8 +12,7 @@ Changes that are not in this API but that would be backwards compatible in a lat
 
 - Realities
 - Anchors
-- Environment info like point clouds and light estimates
-- Individual layer input focus
+- Environment info like point clouds, manifolds, and light estimates
 
 
 ## XR
@@ -31,8 +30,8 @@ Changes that are not in this API but that would be backwards compatible in a lat
 		readonly attribute DOMString displayName;
 		readonly attribute boolean isExternal;
 
-		Promise<boolean> supportsSession(XRSessionCreateParametersInit parameters);
-		Promise<XRSession> requestSession(XRSessionCreateParametersInit parameters);
+		Promise<boolean> supportsSession(XRSessionCreateOptions parameters);
+		Promise<XRSession> requestSession(XRSessionCreateOptions parameters);
 
 		attribute EventHandler ondeactivate;
 	};
@@ -41,16 +40,19 @@ Changes that are not in this API but that would be backwards compatible in a lat
 
 	interface XRSession : EventTarget {
 		readonly attribute XRDisplay display;
-		readonly attribute XRSessionCreateParameters createParameters;
 
-		attribute XRLayer layer;
+		readonly attribute boolean exclusive;
+		readonly attribute XRPresentationContext outputContext;
+		readonly attribute XRSessionType type;
+
+		attribute XRLayer baseLayer;
 		attribute double depthNear;
 		attribute double depthFar;
 
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
-		readonly attribute boolean hasStageBounds; (moved here from VRFrameOfReference)
+		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
 
 		Promise<void> end();
@@ -62,18 +64,22 @@ Changes that are not in this API but that would be backwards compatible in a lat
 		attribute EventHandler onended;
 	};
 
-	dictionary XRSessionCreateParametersInit {
-		required boolean exclusive = true;
+	enum XRSessionType { "reality" }; // eventually also 'augmentation'
+
+	dictionary XRSessionCreateOptions {
+		boolean exclusive;
+		XRPresentationContext outputContext;
+		XRSessionType type;
 	};
 
-	interface VRSessionCreateParameters {
-		readonly attribute boolean exclusive;
+	[SecureContext, Exposed=Window] interface XRPresentationContext {
+		readonly attribute HTMLCanvasElement canvas;
 	};
 
 ## XRStageBounds
 
 	interface XRStageBounds {
-		readonly attribute XRCoordinates center; (new)
+		readonly attribute XRCoordinates center;
 		readonly attribute FrozenArray<XRStageBoundsPoint>? geometry;
 	};
 
@@ -87,18 +93,19 @@ Changes that are not in this API but that would be backwards compatible in a lat
 ## XRPresentationFrame
 
 	interface XRPresentationFrame {
+		readonly attribute XRSession session;
 		readonly attribute FrozenArray<XRView> views;
 
-		XRCoordinateSystem? getCoordinateSystem(XRFrameOfReferenceType type, ...); (new)
+		XRCoordinateSystem? getCoordinateSystem(...XRFrameOfReferenceType types); // Tries the types in order, returning the first match or null if none is found
 
-		XRViewPose? getViewPose(XRCoordinateSystem coordinateSystem); (renamed from getDevicePose)
+		XRViewPose? getViewPose(XRCoordinateSystem coordinateSystem);
 	};
 
 ## XRView
 
 	interface XRView {
-		readonly attribute XREye eye;
-		readonly attribute Float32Array projectionMatrix;
+		readonly attribute XREye? eye; // 'left', 'right', null
+		attribute Float32Array projectionMatrix;
 
 		XRViewport? getViewport(XRLayer layer);
 	};
@@ -106,33 +113,34 @@ Changes that are not in this API but that would be backwards compatible in a lat
 ## XRViewport
 
 	interface XRViewport {
-		readonly attribute long x;
-		readonly attribute long y;
-		readonly attribute long width;
-		readonly attribute long height;
+		attribute long x;
+		attribute long y;
+		attribute long width;
+		attribute long height;
 	};
 
 ## XRCoordinateSystem
 
-	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage" };
+	enum XRFrameOfReferenceType { "headModel", "eyeLevel", "stage" }; // eventually 'geospatial'
 
 	interface XRCoordinateSystem {
-		readonly attribute XRFrameOfReferenceType type; (new)
+		readonly attribute XRFrameOfReferenceType type;
 
 		Float32Array? getTransformTo(XRCoordinateSystem other);
 	};
 
-## XRCoordinates (new)
+
+## XRCoordinates
 
 	interface XRCoordinates {
 		readonly attribute XRCoordinateSystem coordinateSystem;
-		readonly attribute Float32Array poseMatrix;
+		attribute Float32Array poseMatrix;
 
 		XRCoordinates? getTransformedCoordinates(XRCoordinateSystem otherCoordinateSystem) 
 	};
 
 
-## XRViewPose (renamed from VRDevicePose)
+## XRViewPose
 
 	interface XRViewPose {
 		readonly attribute Float32Array poseModelMatrix;
@@ -166,5 +174,6 @@ Changes that are not in this API but that would be backwards compatible in a lat
 
 		void requestViewportScaling(double viewportScaleFactor);
 	};
+
 
 

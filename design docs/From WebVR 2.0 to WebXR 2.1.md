@@ -1,12 +1,11 @@
 ## WebVR 2.0 changes to *allow* AR
 
-These are the minimal changes to 2.0 needed to allow AR of the type described in [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md).
+These are the minimal changes to 2.0 needed so that at some point in the future we could support AR of the type described in [WebXR API.md](https://github.com/mozilla/webxr-api/blob/master/WebXR%20API.md) and implemented in [webxr-polyfill](https://github.com/mozilla/webxr-polyfill).
 
 ### Rename
 
 - rename everything from VR* to XR*
 - rename VRDevice to XRDisplay
-- rename XRSession.baseLayer to XRSession.layer (Reality.layer will eventually be the base)
 - rename VRDevicePose to XRViewPose
 
 ### Coordinate system
@@ -36,21 +35,20 @@ These are the minimal changes to 2.0 needed to allow AR of the type described in
 - add XRLightEstimate
 - add XRAnchor, XRPlaneAnchor, and XRAnchorOffset
 - add XRManifold
+- add XRCartographicCoordinates
 
 ### Interface additions
 
-- add XRCartographicCoordinates
 - add "geospatial" to existing XRFrameOfReferenceType types "headModel", "eyeLevel", and "stage"
 - update XRCoordinateSystem to include an optional XRCartographicCoordinates attribute
-- add XRSessionRealityType attribute to VRSessionCreateParameters and VRSessionCreateParametersInit
-- update XRSession to add Reality management API
-- update XRLayer to include focus API
-- update XRPresentationFrame to add point cloud, light estimate, manifold, and anchor API
 
+- add XRSessionType attribute to XRSessionCreateOptions to support either a Reality session or an augmentation session
+- update XRLayer to include focus API
+- update XRPresentationFrame to add point cloud, light estimate, manifold, and anchor APIs
 
 
 ## Questions
 
 - What to do about "exclusive" flag on session creation?
 - Do we need a coordinate system on the XRViewPose?
-- Will XRSessions have only one layer? And Realities?
+- Will VR/XRSession have only one layer?
