@@ -84,9 +84,8 @@ A Hololens could expose a single passthrough display.
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
-		// Request the camera frame available in XRPresentationFrame.
-		// This operation will ask for users' permission.
-		Promise<void> requestCameraAccess(XRCameraSource camera);
+		// Request to process camera frames. This operation will ask for users' permission.
+		Promise<XRCameraFrameProcessor> requestCameraFrame(XRCameraSource camera);
 
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
@@ -241,6 +240,61 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		readonly attribute Float32Array viewMatrix;
 	};
 
+## XRCameraFrameProcessor
+
+	interface XRCameraFrameProcessor : EventTarget {
+		readonly EventHandler onframe;
+	};
+	
+Example:
+
+`main.js`:
+```js
+vrSession.requestCameraFrame.then((processor) => {
+  let worker = new Worker("processing.js");
+  worker.onmessage = function(msg) {
+    switch (msg.data.aCommand) {
+      case 'marker_detected':
+        updateMaker(msg.data.aMarker);
+        break;
+      default:
+        throw 'no aTopic on incoming message to Worker';
+    }
+  };
+  worker.postMessage({aCommand: 'bind_processor', aProcessor: processor}, [processor]);
+});
+```
+`processing.js`:
+```js
+self.onmessage = function(msg) {
+  switch (msg.data.aCommand) {
+    case 'bind_processor':
+      bindProcessor(msg.data.aProcessor);
+      break;
+    default:
+      throw 'no aTopic on incoming message to Worker';
+  }
+};
+
+function bindProcessor(processor) {
+  processor.onframe = function(event) {
+    let marker = detectMaker(event.frame)
+    if (marker)
+      postMessage({aCommand: 'marker_detected', aMaker: maker}, [marker]);
+  }
+}
+```
+## XRCameraFrameProcessorEvent
+
+	[Constructor(DOMString type, optional XRCameraFrameProcessorEventInit dict)]
+	interface XRCameraFrameProcessorEvent : Event {
+    		attribute XRCameraFrame? frame;
+	};
+
+	dictionary XRCameraFrameProcessorEventInit : EventInit {
+    		required XRCameraFrame? frame;
+	};
+
 ## XRPresentationFrame
 
 	interface XRPresentationFrame {
@@ -274,10 +328,6 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 - How can we offer up a more generic ray based equivalent to the screen oriented findAnchor?
 - Should we fire an event when a marker or feature based anchor (e.g. a wall, a table top) is detected?
 - How can we access camera image buffers aor textures?
-
-`getCameraFrame` allows developers to access camera image and pose data. For some devices, the camera frame is not always available in each presentation frame. `getCameraFrame` returns `XRCameraFrame` object when sychronized camera frame is available to current presentation frame, otherwise, it returns nothing. 
-
-When `XRCameraFrame` available, developers are able to draw the camera image by WebGL insdie the rendering loop for devices. Or developers are able to send the camera frame to a worker thread for computer vision processing, e.g. marker detection, in parallel.
 
 ## XRView
 
