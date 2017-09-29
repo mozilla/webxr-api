@@ -2,7 +2,7 @@
 
 This document is based off of the [Editor's draft of WebVR](https://w3c.github.io/webvr/spec/latest/), modified to support both VR and AR.
 
-There is a [webxr-polyfill repo](https://github.com/mozilla/webxr-polyfill) with [example code](https://github.com/mozilla/webxr-polyfill/tree/master/examples).
+There is a [webxr-polyfill repo](https://github.com/mozilla/webxr-polyfill) with [example code](https://github.com/mozilla/webxr-polyfill/tree/master/examples) and a [primer on using the APIs](https://github.com/mozilla/webxr-polyfill/blob/master/CODING.md).
 
 For easy comparison, we maintain a [list of changes from WebVR 2.0 to WebXR](https://github.com/mozilla/webxr-api/blob/master/design%20docs/From%20WebVR%202.0%20to%20WebXR%202.1.md).
 

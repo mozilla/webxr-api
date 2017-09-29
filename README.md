@@ -7,6 +7,8 @@ The initial interface draft is in [WebXR API.md](https://github.com/mozilla/webx
 
 A polyfill and example code using this draft WebXR API is available in the [webxr-polyfill repository](https://github.com/mozilla/webxr-polyfill).
 
+There is also a [primer on using the WebXR APIs](https://github.com/mozilla/webxr-polyfill/blob/master/CODING.md).
+
 We maintain a [list of changes we made to the WebVR 2.0 draft to create the WebXR draft](https://github.com/mozilla/webxr-api/blob/master/design%20docs/From%20WebVR%202.0%20to%20WebXR%202.1.md).
 
 Some of the concepts we believe are important to have in WebXR include:
