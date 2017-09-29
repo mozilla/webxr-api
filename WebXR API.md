@@ -75,6 +75,8 @@ A Hololens could expose a single passthrough display.
 		readonly attribute <sequence <Reality>> realities; // All realities available to this session
 		readonly attribute Reality reality; // For augmentation sessions, this defaults to most recently used Reality. For reality sessions, this defaults to a new virtual Reality.
 
+		readonly attribute sequence<XRCamera> cameras; // All cameras available to this session
+
 		attribute XRLayer baseLayer;
 		attribute double depthNear;
 		attribute double depthFar;
@@ -82,7 +84,9 @@ A Hololens could expose a single passthrough display.
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
 
-		FrozenArray<XRCamera> getCameras();
+		// Request the camera frame available in XRPresentationFrame.
+		// This operation will ask for users' permission.
+		Promise<void> requestCameraAccess(XRCameraSource camera);
 
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
@@ -210,14 +214,14 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 	};
 
 	interface XRCamera : XRCameraSource {
-		readonly attribute DOMString kind;
 		readonly attribute DOMString id;
+		readonly attribute DOMString kind;
 		readonly attribute DOMString label;
+		readonly attribute DOMString groupId;
 		readonly attribute long width;
-		readonly attribute long height;
-		readonly attribute double aspectRatio;
-		readonly attribute double frameRate;
-		Promise<void> requestAccess();
+ 		readonly attribute long height;
+ 		readonly attribute double aspectRatio;
+ 		readonly attribute double frameRate;
 	};
 
 ## XRCameraFrame
@@ -228,7 +232,7 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		XRCameraPose? getPose(XRCoordinateSystem coordinateSystem); 
 	};
 	
-[ImageBitmap Extension](https://w3c.github.io/mediacapture-worker/#imagebitmap-extensions)
+[ImageBitmap Extension](https://w3c.github.io/mediacapture-worker/#imagebitmap-extensions) allows developers to process the captured image in native format, e.g. YUV, RGB or DEPTH, by either asm.js/wasm or WebGL/WebGPU.
 
 ## XRCameraPose
 
@@ -270,6 +274,10 @@ _The XRPresentationFrame differs from the VRPresentationFrame with the addition 
 - How can we offer up a more generic ray based equivalent to the screen oriented findAnchor?
 - Should we fire an event when a marker or feature based anchor (e.g. a wall, a table top) is detected?
 - How can we access camera image buffers aor textures?
+
+`getCameraFrame` allows developers to access camera image and pose data. For some devices, the camera frame is not always available in each presentation frame. `getCameraFrame` returns `XRCameraFrame` object when sychronized camera frame is available to current presentation frame, otherwise, it returns nothing. 
+
+When `XRCameraFrame` available, developers are able to draw the camera image by WebGL insdie the rendering loop for devices. Or developers are able to send the camera frame to a worker thread for computer vision processing, e.g. marker detection, in parallel.
 
 ## XRView
 
