@@ -75,17 +75,12 @@ A Hololens could expose a single passthrough display.
 		readonly attribute <sequence <Reality>> realities; // All realities available to this session
 		readonly attribute Reality reality; // For augmentation sessions, this defaults to most recently used Reality. For reality sessions, this defaults to a new virtual Reality.
 
-		readonly attribute sequence<XRCamera> cameras; // All cameras available to this session
-
 		attribute XRLayer baseLayer;
 		attribute double depthNear;
 		attribute double depthFar;
 
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
-
-		// Request to process camera frames. This operation will ask for users' permission.
-		Promise<XRCameraFrameProcessor> requestCameraFrame(XRCameraSource camera);
 
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
@@ -128,6 +123,8 @@ _The XRSession plays the same basic role as the VRSession, with the addition of 
 		readonly attribute boolean isPassthrough; // True if the Reality is a view of the outside world, not a full VR
 
 		XRCoordinateSystem? getCoordinateSystem(...XRFrameOfReferenceType type); // Tries the types in order, returning the first match or null if none is found
+	
+		Promise<XRCameraFrameProcessor> requestCameraFrame();  // This operation will ask for users' permission.
 
 		attribute EventHandler onchange;
 	};
@@ -204,25 +201,6 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		readonly attribute double z;
 	};
 
-## XRCamera
-
-	enum XRCameraKindEnum {
-		"color",
-		"depth",
-		"ir"
-	};
-
-	interface XRCamera : XRCameraSource {
-		readonly attribute DOMString id;
-		readonly attribute DOMString kind;
-		readonly attribute DOMString label;
-		readonly attribute DOMString groupId;
-		readonly attribute long width;
- 		readonly attribute long height;
- 		readonly attribute double aspectRatio;
- 		readonly attribute double frameRate;
-	};
-
 ## XRCameraFrame
 
 	interface XRCameraFrame {
@@ -250,7 +228,7 @@ Example:
 
 `main.js`:
 ```js
-vrSession.requestCameraFrame.then((processor) => {
+reality.requestCameraFrame().then((processor) => {
   let worker = new Worker("processing.js");
   worker.onmessage = function(msg) {
     switch (msg.data.aCommand) {
@@ -309,8 +287,6 @@ function bindProcessor(processor) {
 
 		readonly attribute boolean hasLightEstimate;
 		readonly attribute XRLightEstimate? lightEstimate;
-
-		XRCameraFrame? getCameraFrame(XRCameraSource cameraSource);
 
 		readonly attribute sequence<XRAnchor> anchors;
 		DOMString addAnchor(XRAnchor anchor);
