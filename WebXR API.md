@@ -250,7 +250,7 @@ Example:
 
 `main.js`:
 ```js
-vrSession.requestCameraFrame.then((processor) => {
+vrSession.requestCameraFrame(source).then((processor) => {
   let worker = new Worker("processing.js");
   worker.onmessage = function(msg) {
     switch (msg.data.aCommand) {
@@ -309,8 +309,6 @@ function bindProcessor(processor) {
 
 		readonly attribute boolean hasLightEstimate;
 		readonly attribute XRLightEstimate? lightEstimate;
-
-		XRCameraFrame? getCameraFrame(XRCameraSource cameraSource);
 
 		readonly attribute sequence<XRAnchor> anchors;
 		DOMString addAnchor(XRAnchor anchor);
