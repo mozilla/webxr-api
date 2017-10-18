@@ -85,7 +85,7 @@ A Hololens could expose a single passthrough display.
 		void cancelFrame(long handle);
 
 		// Request to process camera frames. This operation will ask for users' permission.
-		Promise<XRCameraFrameProcessor> requestCameraFrame(XRCameraSource camera);
+		Promise<XRCameraWorkletController> requestCameraProcessing(XRCameraSource camera);
 
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
@@ -240,60 +240,65 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		readonly attribute Float32Array viewMatrix;
 	};
 
-## XRCameraFrameProcessor
+## XRCameraWorkletController
 
-	interface XRCameraFrameProcessor : EventTarget {
-		readonly EventHandler onframe;
+	enum XRCameraWorkletProcessorState {
+		"pending",
+		"running",
+		"stopped",
+		"error"
+	};
+  
+	interface XRCameraWorkletController {
+		void createWorkletProcessor(DOMString name);
+		readonly attribute MessagePort port;
+		readonly attribute XRCameraWorkletProcessorState processorState;
+		attribute EventHandler onprocessorstatechange;
+	};
+
+## XRCameraWorkletProcessor
+
+	partial interface Window {
+		readonly attribute Worklet xrCameraWorklet;
 	};
 	
+	interface XRCameraWorkletGlobalScope : WorkletGlobalScope {
+		void registerProcessor(DOMString name, VoidFunction processorCtor);
+	};
+	
+	interface XRCameraWorkletProcessor {
+		readonly attribute MessagePort port;
+	};
+
 Example:
 
 `main.js`:
 ```js
-vrSession.requestCameraFrame(source).then((processor) => {
-  let worker = new Worker("processing.js");
-  worker.onmessage = function(msg) {
+vrSession.requestCameraProcessing(source).then((controller) => {
+  controller.port.onmessage = function(msg) {
     switch (msg.data.aCommand) {
       case 'marker_detected':
         updateMaker(msg.data.aMarker);
         break;
       default:
-        throw 'no aTopic on incoming message to Worker';
+        throw 'no aTopic on incoming message from Worklet';
     }
   };
-  worker.postMessage({aCommand: 'bind_processor', aProcessor: processor}, [processor]);
+  window.xrCameraWorklet.addModule('processing.js').then(() => {
+    controller.createWorkletProcessor('marker-detector');
+  });
 });
 ```
 `processing.js`:
 ```js
-self.onmessage = function(msg) {
-  switch (msg.data.aCommand) {
-    case 'bind_processor':
-      bindProcessor(msg.data.aProcessor);
-      break;
-    default:
-      throw 'no aTopic on incoming message to Worker';
-  }
-};
-
-function bindProcessor(processor) {
-  processor.onframe = function(event) {
-    let marker = detectMaker(event.frame)
+registerProcessor('marker-detector', class extends XRCameraWorkletProcessor {
+  process (frame) {
+    let marker = detectMaker(frame)
     if (marker)
-      postMessage({aCommand: 'marker_detected', aMaker: maker}, [marker]);
+      this.port.postMessage({aCommand: 'marker_detected', aMaker: maker}, [marker]);
   }
-}
+});
 ```
-## XRCameraFrameProcessorEvent
-
-	[Constructor(DOMString type, optional XRCameraFrameProcessorEventInit dict)]
-	interface XRCameraFrameProcessorEvent : Event {
-    		attribute XRCameraFrame? frame;
-	};
-
-	dictionary XRCameraFrameProcessorEventInit : EventInit {
-    		required XRCameraFrame? frame;
-	};
 
 ## XRPresentationFrame
 
