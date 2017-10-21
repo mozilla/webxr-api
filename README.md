@@ -17,7 +17,7 @@ Some of the concepts we believe are important to have in WebXR include:
 
 - Making access to video frames and other "world knowledge" up to the user-agent, so they may require permission from user for access to these resources.
 
-- Dupporting the potential for multiple simultaneous AR pages, where each page knows that they are rendering on top of reality and if they have focus. Supporting these lines up with the ability to render reality inside the browser since each application would not be responsible for rendering the view of reality, so their content could be composited.
+- Supporting the potential for multiple simultaneous AR pages, where each page knows that they are rendering on top of reality and if they have focus. Supporting these lines up with the ability to render reality inside the browser since each application would not be responsible for rendering the view of reality, so their content could be composited.
 
 - Supporting some form of the idea of “custom, user defined” representations of reality like fully virtual realities. The critical feature is that the "reality" code can “filter” the view pose that is passed back into the rAF callback, both in the same page and in _other_ pages (if there is multi-page support).
 
