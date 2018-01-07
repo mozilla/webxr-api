@@ -1,6 +1,6 @@
 # WebXR draft (do not implement)
 
-This document is based off of the [Editor's draft of WebVR](https://w3c.github.io/webvr/spec/latest/), modified to support both VR and AR.
+This document is based off of the [Editor's draft of WebVR](https://immersive-web.github.io/webxr/spec/latest/), modified to support both VR and AR.
 
 There is a [webxr-polyfill repo](https://github.com/mozilla/webxr-polyfill) with [example code](https://github.com/mozilla/webxr-polyfill/tree/master/examples) and a [primer on using the APIs](https://github.com/mozilla/webxr-polyfill/blob/master/CODING.md).
 
