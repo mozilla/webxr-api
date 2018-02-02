@@ -1,5 +1,9 @@
-# webxr-api
-A proposal and starting point for discussing WebXR, an expansion of WebVR to include AR/MR capabilities.
+# (obsolete) webxr-api
+This repository contains a draft proposal and starting point for discussing WebXR that we created in the fall of 2017, to explore what it might mean to expand WebVR to include AR/MR capabilities.
+
+The WebVR community has shifted WebVR in this direction.  The group is now called the [Immersive Web Community Group](https://github.com/immersive-web/) and the WebVR specification has now become the [WebXR Device API](https://github.com/immersive-web/webxr).  
+
+## (old README, for historical purposes) 
 
 In order to make progress on defining WebXR, we are creating a proposal for this capability.  The api is intended to build on the concepts already included in the native WebVR implementation, or the WebVR polyfill, but extend them with AR capabilities appropriate for the underlying platform.
 
