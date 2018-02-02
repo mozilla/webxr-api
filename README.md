@@ -3,6 +3,8 @@ This repository contains a draft proposal and starting point for discussing WebX
 
 The WebVR community has shifted WebVR in this direction.  The group is now called the [Immersive Web Community Group](https://github.com/immersive-web/) and the WebVR specification has now become the [WebXR Device API](https://github.com/immersive-web/webxr).  
 
+We will not be updating this site any longer, although we will continue to experiment with the [webxr-polyfill](https://github.com/mozilla/webxr-polyfill) we created when we created this API specification, until there is a complete WebXR polyfill. At that point we expect to shift our experiments to the new polyfill.
+
 ## (old README, for historical purposes) 
 
 In order to make progress on defining WebXR, we are creating a proposal for this capability.  The api is intended to build on the concepts already included in the native WebVR implementation, or the WebVR polyfill, but extend them with AR capabilities appropriate for the underlying platform.
