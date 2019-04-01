@@ -75,12 +75,17 @@ A Hololens could expose a single passthrough display.
 		readonly attribute <sequence <Reality>> realities; // All realities available to this session
 		readonly attribute Reality reality; // For augmentation sessions, this defaults to most recently used Reality. For reality sessions, this defaults to a new virtual Reality.
 
+		readonly attribute sequence<XRCamera> cameras; // All cameras available to this session
+
 		attribute XRLayer baseLayer;
 		attribute double depthNear;
 		attribute double depthFar;
 
 		long requestFrame(XRFrameRequestCallback callback);
 		void cancelFrame(long handle);
+
+		// Request to process camera frames. This operation will ask for users' permission.
+		Promise<XRCameraWorkletController> requestCameraProcessing(XRCameraSource camera);
 
 		readonly attribute boolean hasStageBounds;
 		readonly attribute XRStageBounds? stageBounds;
@@ -198,6 +203,102 @@ XRAnchorOffset represents a position in relation to an anchor, returned from XRP
 		readonly attribute double x;
 		readonly attribute double z;
 	};
+
+## XRCamera
+
+	enum XRCameraKindEnum {
+		"color",
+		"depth",
+		"ir"
+	};
+
+	interface XRCamera : XRCameraSource {
+		readonly attribute DOMString id;
+		readonly attribute DOMString kind;
+		readonly attribute DOMString label;
+		readonly attribute DOMString groupId;
+		readonly attribute long width;
+ 		readonly attribute long height;
+ 		readonly attribute double aspectRatio;
+ 		readonly attribute double frameRate;
+	};
+
+## XRCameraFrame
+
+	interface XRCameraFrame {
+		readonly attribute ImageBitmap capturedImage;
+		readonly attribute Float32Array projectionMatrix;
+		XRCameraPose? getPose(XRCoordinateSystem coordinateSystem); 
+	};
+	
+[ImageBitmap Extension](https://w3c.github.io/mediacapture-worker/#imagebitmap-extensions) allows developers to process the captured image in native format, e.g. YUV, RGB or DEPTH, by either asm.js/wasm or WebGL/WebGPU.
+
+## XRCameraPose
+
+	interface XRCameraPose {
+		readonly attribute Float32Array poseModelMatrix;
+		readonly attribute Float32Array viewMatrix;
+	};
+
+## XRCameraWorkletController
+
+	enum XRCameraWorkletProcessorState {
+		"pending",
+		"running",
+		"stopped",
+		"error"
+	};
+  
+	interface XRCameraWorkletController {
+		void createWorkletProcessor(DOMString name);
+		readonly attribute MessagePort port;
+		readonly attribute XRCameraWorkletProcessorState processorState;
+		attribute EventHandler onprocessorstatechange;
+	};
+
+## XRCameraWorkletProcessor
+
+	partial interface Window {
+		readonly attribute Worklet xrCameraWorklet;
+	};
+	
+	interface XRCameraWorkletGlobalScope : WorkletGlobalScope {
+		void registerProcessor(DOMString name, VoidFunction processorCtor);
+	};
+	
+	interface XRCameraWorkletProcessor {
+		readonly attribute MessagePort port;
+	};
+
+Example:
+
+`main.js`:
+```js
+vrSession.requestCameraProcessing(source).then((controller) => {
+  controller.port.onmessage = function(msg) {
+    switch (msg.data.aCommand) {
+      case 'marker_detected':
+        updateMaker(msg.data.aMarker);
+        break;
+      default:
+        throw 'no aTopic on incoming message from Worklet';
+    }
+  };
+  window.xrCameraWorklet.addModule('processing.js').then(() => {
+    controller.createWorkletProcessor('marker-detector');
+  });
+});
+```
+`processing.js`:
+```js
+registerProcessor('marker-detector', class extends XRCameraWorkletProcessor {
+  process (frame) {
+    let marker = detectMaker(frame)
+    if (marker)
+      this.port.postMessage({aCommand: 'marker_detected', aMaker: maker}, [marker]);
+  }
+});
+```
 
 ## XRPresentationFrame
 
